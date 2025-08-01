@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../widgets/animated_user_card.dart';
 import '../widgets/modern_track_card.dart';
 import '../../../../core/data/repositories/python_repository.dart';
 
-class HomeScreen extends ConsumerStatefulWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen>
+class _HomeScreenState extends State<HomeScreen>
     with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late AnimationController _slideController;
@@ -60,7 +59,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    final tracks = ref.watch(pythonRepositoryProvider).getTracks();
+    final track = PythonRepository.pythonTrack;
 
     return Scaffold(
       body: Container(
@@ -116,7 +115,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                 'ابدأ رحلتك في عالم البرمجة',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  opacity: 0.7,
+                                  color: Colors.black54,
                                 ),
                               ),
                             ],
@@ -127,15 +126,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   ),
 
                   // User Card
-                  SliverToBoxAdapter(
+                  const SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: AnimatedUserCard(
-                        userName: 'أحمد محمد',
-                        userLevel: 'مبتدئ',
-                        userAvatar: '👨‍💻',
-                        streakDays: 7,
-                      ),
+                      padding: EdgeInsets.all(20),
+                      child: AnimatedUserCard(),
                     ),
                   ),
 
@@ -172,25 +166,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
                   const SliverToBoxAdapter(child: SizedBox(height: 20)),
 
-                  // Tracks Grid
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final track = tracks[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 20),
-                            child: ModernTrackCard(
-                              track: track,
-                              onTap: () {
-                                context.push('/course/${track.id}');
-                              },
-                              animationDelay: Duration(milliseconds: 200 * index),
-                            ),
-                          );
+                  // Track Card
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: ModernTrackCard(
+                        track: track,
+                        onTap: () {
+                          context.push('/course/python');
                         },
-                        childCount: tracks.length,
                       ),
                     ),
                   ),

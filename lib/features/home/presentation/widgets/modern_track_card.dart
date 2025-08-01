@@ -69,10 +69,10 @@ class _ModernTrackCardState extends State<ModernTrackCard>
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     colors: [
-                      const Color(0xFF4A90E2),
-                      const Color(0xFF7B68EE),
+                      Color(0xFF4A90E2),
+                      Color(0xFF7B68EE),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -103,10 +103,10 @@ class _ModernTrackCardState extends State<ModernTrackCard>
                           ),
                         ],
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           '🐍',
-                          style: const TextStyle(fontSize: 40),
+                          style: TextStyle(fontSize: 40),
                         ),
                       ),
                     ),

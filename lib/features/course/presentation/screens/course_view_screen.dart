@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/data/repositories/python_repository.dart';
-import '../../../../core/data/models/lesson_model.dart';
+import '../../../../core/constants/app_constants.dart';
 
-class CourseViewScreen extends ConsumerStatefulWidget {
+class CourseViewScreen extends StatefulWidget {
   final String trackId;
 
   const CourseViewScreen({super.key, required this.trackId});
 
   @override
-  ConsumerState<CourseViewScreen> createState() => _CourseViewScreenState();
+  State<CourseViewScreen> createState() => _CourseViewScreenState();
 }
 
-class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
+class _CourseViewScreenState extends State<CourseViewScreen>
     with TickerProviderStateMixin {
   late AnimationController _headerController;
   late AnimationController _lessonsController;
@@ -61,29 +60,82 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
     super.dispose();
   }
 
+  void _navigateToLesson(BuildContext context, String lessonId) {
+    context.push('/lesson/$lessonId');
+  }
+
+  void _showLockedDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            'درس مقفل 🔒',
+            style: Theme.of(context).textTheme.headlineSmall,
+            textAlign: TextAlign.center,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.errorContainer,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Icon(
+                  Icons.lock_rounded,
+                  size: 40,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'يجب إكمال الدروس السابقة أولاً',
+                style: Theme.of(context).textTheme.bodyLarge,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('حسناً'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final track = ref.watch(pythonRepositoryProvider).getTrackById(widget.trackId);
-    final lessons = ref.watch(pythonRepositoryProvider).getLessonsByTrackId(widget.trackId);
-
-    if (track == null) {
-      return const Scaffold(
-        body: Center(child: Text('المسار غير موجود')),
-      );
-    }
+    final track = PythonRepository.pythonTrack;
+    final lessons = [
+      {'id': 'python_hello', 'title': 'البداية', 'isUnlocked': true, 'isCompleted': false},
+      {'id': 'python_variables', 'title': 'المتغيرات', 'isUnlocked': false, 'isCompleted': false},
+      {'id': 'python_data', 'title': 'العمل مع البيانات', 'isUnlocked': false, 'isCompleted': false},
+      {'id': 'python_functions', 'title': 'الدوال', 'isUnlocked': false, 'isCompleted': false},
+      {'id': 'python_loops', 'title': 'الحلقات', 'isUnlocked': false, 'isCompleted': false},
+      {'id': 'python_project', 'title': 'المشروع النهائي', 'isUnlocked': false, 'isCompleted': false},
+    ];
 
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(0xFF4A90E2),
-              const Color(0xFF7BB3F0),
-              Theme.of(context).colorScheme.surface,
+              Color(0xFF4A90E2),
+              Color(0xFF7BB3F0),
+              Color(0xFFF8FAFF),
             ],
-            stops: const [0.0, 0.4, 1.0],
+            stops: [0.0, 0.4, 1.0],
           ),
         ),
         child: SafeArea(
@@ -172,9 +224,9 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
                       const SizedBox(height: 20),
                       
                       // Welcome Message
-                      const Text(
-                        'أحمد، مرحباً بك في عالم Python',
-                        style: TextStyle(
+                      Text(
+                        '${AppConstants.mockUserName}، مرحباً بك في عالم Python',
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
@@ -212,13 +264,13 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
                               
                               return AnimatedOpacity(
                                 opacity: _lessonsAnimation.value,
-                                duration: Duration(milliseconds: 300 + (index * 100)),
+                                duration: Duration(milliseconds: (300 + (index * 100)).toInt()),
                                 child: AnimatedSlide(
                                   offset: Offset(
                                     isLeft ? -0.3 * (1 - _lessonsAnimation.value) : 0.3 * (1 - _lessonsAnimation.value),
                                     0,
                                   ),
-                                  duration: Duration(milliseconds: 500 + (index * 100)),
+                                  duration: Duration(milliseconds: (500 + (index * 100)).toInt()),
                                   curve: Curves.easeOutCubic,
                                   child: _buildLessonCard(lesson, index, isLeft),
                                 ),
@@ -239,7 +291,7 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
     );
   }
 
-  Widget _buildLessonCard(LessonModel lesson, int index, bool isLeft) {
+  Widget _buildLessonCard(Map<String, dynamic> lesson, int index, bool isLeft) {
     final colors = [
       [const Color(0xFF4A90E2), const Color(0xFF7BB3F0)], // Blue
       [const Color(0xFF8E44AD), const Color(0xFFBB6BD9)], // Purple
@@ -260,8 +312,8 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
 
     final colorPair = colors[index % colors.length];
     final icon = icons[index % icons.length];
-    final isCompleted = index < 2; // First 2 lessons completed
-    final isLocked = index > 2; // Lessons after 3rd are locked
+    final isCompleted = lesson['isCompleted'] as bool;
+    final isLocked = !(lesson['isUnlocked'] as bool);
 
     return Container(
       margin: EdgeInsets.only(
@@ -276,7 +328,7 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
             Positioned(
               top: 80,
               left: isLeft ? 120 : -60,
-              child: Container(
+              child: SizedBox(
                 width: 80,
                 height: 2,
                 child: CustomPaint(
@@ -289,8 +341,8 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
 
           // Lesson Card
           GestureDetector(
-            onTap: isLocked ? null : () {
-              context.push('/lesson/${lesson.id}');
+            onTap: isLocked ? () => _showLockedDialog(context) : () {
+              _navigateToLesson(context, lesson['id'] as String);
             },
             child: Container(
               width: 200,
@@ -353,7 +405,7 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
                         
                         // Title
                         Text(
-                          '${index + 1}. ${lesson.title}',
+                          '${index + 1}. ${lesson['title']}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 14,

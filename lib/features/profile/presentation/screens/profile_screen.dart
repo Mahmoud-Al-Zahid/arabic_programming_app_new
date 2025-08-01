@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/constants/app_constants.dart';
 
-class ProfileScreen extends ConsumerStatefulWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+  State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends ConsumerState<ProfileScreen>
+class _ProfileScreenState extends State<ProfileScreen>
     with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late AnimationController _statsController;
@@ -73,222 +73,217 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         child: SafeArea(
           child: FadeTransition(
             opacity: _fadeAnimation,
-            child: CustomScrollView(
-              slivers: [
-                // App Bar
-                SliverAppBar(
-                  expandedHeight: 200,
-                  floating: false,
-                  pinned: true,
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  flexibleSpace: FlexibleSpaceBar(
-                    background: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                            Colors.transparent,
-                          ],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 40),
-                          // Profile Avatar
-                          Container(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Theme.of(context).colorScheme.primary,
-                                  Theme.of(context).colorScheme.secondary,
-                                ],
-                              ),
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                            ),
-                            child: const Center(
-                              child: Text(
-                                '👨‍💻',
-                                style: TextStyle(fontSize: 40),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'أحمد محمد',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            'مطور Python مبتدئ',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                            ),
-                          ),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  
+                  // Profile Header
+                  Container(
+                    margin: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Theme.of(context).colorScheme.primary,
+                          Theme.of(context).colorScheme.tertiary,
                         ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                    ),
-                  ),
-                ),
-
-                // Statistics Section
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                Icons.analytics_rounded,
-                                color: Theme.of(context).colorScheme.primary,
-                                size: 24,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            const Text(
-                              'إحصائياتي',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
                         ),
-                        const SizedBox(height: 20),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        // Avatar
+                        Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 15,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.person_rounded,
+                            color: Theme.of(context).colorScheme.primary,
+                            size: 50,
+                          ),
+                        ),
                         
-                        // Stats Grid
-                        AnimatedBuilder(
-                          animation: _statsAnimation,
-                          builder: (context, child) {
-                            return GridView.count(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
-                              childAspectRatio: 1.2,
-                              children: [
-                                _buildStatCard(
-                                  title: 'الدروس المكتملة',
-                                  value: '12',
-                                  icon: Icons.school_rounded,
-                                  colors: [const Color(0xFF4A90E2), const Color(0xFF7BB3F0)],
-                                  delay: 0,
-                                ),
-                                _buildStatCard(
-                                  title: 'أيام التعلم',
-                                  value: '7',
-                                  icon: Icons.local_fire_department_rounded,
-                                  colors: [const Color(0xFFE67E22), const Color(0xFFF39C12)],
-                                  delay: 100,
-                                ),
-                                _buildStatCard(
-                                  title: 'النقاط المكتسبة',
-                                  value: '850',
-                                  icon: Icons.stars_rounded,
-                                  colors: [const Color(0xFFFFD700), const Color(0xFFFFF176)],
-                                  delay: 200,
-                                ),
-                                _buildStatCard(
-                                  title: 'الشارات',
-                                  value: '5',
-                                  icon: Icons.emoji_events_rounded,
-                                  colors: [const Color(0xFF8E44AD), const Color(0xFFBB6BD9)],
-                                  delay: 300,
-                                ),
-                              ],
-                            );
-                          },
+                        const SizedBox(height: 16),
+                        
+                        // Name
+                        Text(
+                          AppConstants.mockUserName,
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 8),
+                        
+                        // Level Badge
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            'المستوى ${AppConstants.mockUserLevel}',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
-                ),
-
-                // Achievements Section
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  
+                  // Stats Section
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
                       children: [
-                        Row(
+                        Icon(
+                          Icons.analytics_rounded,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'الإحصائيات',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Stats Grid
+                  AnimatedBuilder(
+                    animation: _statsAnimation,
+                    builder: (context, child) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: GridView.count(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 1.2,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                Icons.emoji_events_rounded,
-                                color: Theme.of(context).colorScheme.secondary,
-                                size: 24,
-                              ),
+                            _buildStatCard(
+                              title: 'النقاط',
+                              value: AppConstants.mockUserXP.toString(),
+                              icon: Icons.star_rounded,
+                              color: const Color(0xFFFFD700),
+                              delay: 0,
                             ),
-                            const SizedBox(width: 12),
-                            const Text(
-                              'الإنجازات',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            _buildStatCard(
+                              title: 'العملات',
+                              value: AppConstants.mockUserCoins.toString(),
+                              icon: Icons.monetization_on_rounded,
+                              color: const Color(0xFF4CAF50),
+                              delay: 100,
+                            ),
+                            _buildStatCard(
+                              title: 'الدروس المكتملة',
+                              value: '12',
+                              icon: Icons.check_circle_rounded,
+                              color: const Color(0xFF2196F3),
+                              delay: 200,
+                            ),
+                            _buildStatCard(
+                              title: 'أيام التعلم',
+                              value: '7',
+                              icon: Icons.local_fire_department_rounded,
+                              color: const Color(0xFFFF5722),
+                              delay: 300,
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
-                        
-                        // Achievement Cards
+                      );
+                    },
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  
+                  // Achievements Section
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.emoji_events_rounded,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'الإنجازات',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Achievements List
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      children: [
                         _buildAchievementCard(
-                          title: 'أول خطوة',
-                          description: 'أكمل أول درس',
-                          icon: '🎯',
+                          title: 'أول درس',
+                          description: 'أكملت أول درس في البايثون',
+                          icon: Icons.rocket_launch_rounded,
                           isUnlocked: true,
                         ),
                         const SizedBox(height: 12),
                         _buildAchievementCard(
                           title: 'متعلم نشط',
-                          description: 'تعلم لمدة 7 أيام متتالية',
-                          icon: '🔥',
+                          description: 'تعلمت لمدة 7 أيام متتالية',
+                          icon: Icons.local_fire_department_rounded,
                           isUnlocked: true,
                         ),
                         const SizedBox(height: 12),
                         _buildAchievementCard(
-                          title: 'خبير Python',
-                          description: 'أكمل 20 درس',
-                          icon: '🐍',
+                          title: 'خبير البايثون',
+                          description: 'أكمل جميع دروس البايثون',
+                          icon: Icons.school_rounded,
                           isUnlocked: false,
                         ),
                       ],
                     ),
                   ),
-                ),
-
-                const SliverToBoxAdapter(child: SizedBox(height: 100)),
-              ],
+                  
+                  const SizedBox(height: 100),
+                ],
+              ),
             ),
           ),
         ),
@@ -300,114 +295,93 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     required String title,
     required String value,
     required IconData icon,
-    required List<Color> colors,
+    required Color color,
     required int delay,
   }) {
-    return AnimatedScale(
-      scale: _statsAnimation.value,
-      duration: Duration(milliseconds: 500 + delay),
+    return TweenAnimationBuilder<double>(
+      duration: Duration(milliseconds: 800 + delay),
+      tween: Tween(begin: 0.0, end: 1.0),
       curve: Curves.elasticOut,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: colors,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: colors[0].withOpacity(0.3),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            // Background Pattern
-            Positioned(
-              top: -20,
-              right: -20,
-              child: Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  shape: BoxShape.circle,
+      builder: (context, animation, child) {
+        return Transform.scale(
+          scale: animation,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.2),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
                 ),
-              ),
+              ],
             ),
-            
-            // Content
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      icon,
-                      color: Colors.white,
-                      size: 24,
-                    ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(15),
                   ),
-                  const Spacer(),
-                  Text(
-                    value,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  child: Icon(
+                    icon,
+                    color: color,
+                    size: 28,
                   ),
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
+                ),
+                const SizedBox(height: 12),
+                TweenAnimationBuilder<int>(
+                  duration: Duration(milliseconds: 1000 + delay),
+                  tween: IntTween(begin: 0, end: int.parse(value)),
+                  builder: (context, animatedValue, child) {
+                    return Text(
+                      animatedValue.toString(),
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                ],
-              ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildAchievementCard({
     required String title,
     required String description,
-    required String icon,
+    required IconData icon,
     required bool isUnlocked,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: isUnlocked 
+          ? Theme.of(context).colorScheme.surface
+          : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isUnlocked 
             ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
-            : Theme.of(context).colorScheme.outline.withOpacity(0.2),
+            : Theme.of(context).colorScheme.outline.withOpacity(0.3),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: isUnlocked 
-              ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
-              : Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Row(
         children: [
@@ -417,14 +391,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
             decoration: BoxDecoration(
               color: isUnlocked 
                 ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
-                : Theme.of(context).colorScheme.outline.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+                : Colors.grey.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(15),
             ),
-            child: Center(
-              child: Text(
-                isUnlocked ? icon : '🔒',
-                style: const TextStyle(fontSize: 24),
-              ),
+            child: Icon(
+              isUnlocked ? icon : Icons.lock_rounded,
+              color: isUnlocked 
+                ? Theme.of(context).colorScheme.primary
+                : Colors.grey,
+              size: 24,
             ),
           ),
           const SizedBox(width: 16),
@@ -434,26 +409,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
               children: [
                 Text(
                   title,
-                  style: TextStyle(
-                    fontSize: 16,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: isUnlocked 
                       ? Theme.of(context).colorScheme.onSurface
-                      : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                      : Colors.grey,
                   ),
                 ),
+                const SizedBox(height: 4),
                 Text(
                   description,
-                  style: TextStyle(
-                    fontSize: 14,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: isUnlocked 
-                      ? Theme.of(context).colorScheme.onSurface.withOpacity(0.7)
-                      : Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+                      ? Theme.of(context).colorScheme.onSurfaceVariant
+                      : Colors.grey,
                   ),
                 ),
               ],
             ),
           ),
+          if (isUnlocked)
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check_rounded,
+                color: Colors.white,
+                size: 16,
+              ),
+            ),
         ],
       ),
     );
