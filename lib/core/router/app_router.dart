@@ -32,7 +32,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const RegistrationScreen(),
       ),
       ShellRoute(
-        builder: (context, state, child) => MainNavigation(child: child),
+        builder: (context, state, child) => MainNavigation(
+          child: child,
+          location: state.uri.path,
+        ),
         routes: [
           GoRoute(
             path: '/home',

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../home/presentation/screens/home_screen.dart';
-import '../../../profile/presentation/screens/profile_screen.dart';
 
 class MainNavigation extends StatefulWidget {
   final Widget child;

@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/data/repositories/python_repository.dart';
 import '../widgets/animated_user_card.dart';
 import '../widgets/modern_track_card.dart';
+import '../../../../core/data/repositories/python_repository.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
+class _HomeScreenState extends ConsumerState<HomeScreen>
     with TickerProviderStateMixin {
   late AnimationController _fadeController;
+  late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
@@ -23,165 +26,178 @@ class _HomeScreenState extends State<HomeScreen>
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
 
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: _fadeController,
-      curve: Curves.easeInOut,
+      curve: Curves.easeOut,
+    ));
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutCubic,
     ));
 
     _fadeController.forward();
+    _slideController.forward();
   }
 
   @override
   void dispose() {
     _fadeController.dispose();
+    _slideController.dispose();
     super.dispose();
-  }
-
-  void _navigateToPythonCourse(BuildContext context) {
-    context.push('/course/python');
   }
 
   @override
   Widget build(BuildContext context) {
+    final tracks = ref.watch(pythonRepositoryProvider).getTracks();
+
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-      body: SafeArea(
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Animated User Card
-                const AnimatedUserCard(),
-                
-                const SizedBox(height: 16),
-                
-                // Learning Path Section
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          Icons.school_rounded,
-                          color: Theme.of(context).colorScheme.primary,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'مسار التعلم',
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Python Track Card
-                ModernTrackCard(
-                  track: PythonRepository.pythonTrack,
-                  onTap: () => _navigateToPythonCourse(context),
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Coming Soon Section
-                Container(
-                  margin: const EdgeInsets.all(16),
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Theme.of(context).colorScheme.surfaceContainer,
-                        Theme.of(context).colorScheme.surface,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).colorScheme.primary.withOpacity(0.05),
+              Theme.of(context).colorScheme.surface,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: CustomScrollView(
+                slivers: [
+                  // App Bar
+                  SliverAppBar(
+                    expandedHeight: 120,
+                    floating: true,
+                    pinned: true,
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                    flexibleSpace: FlexibleSpaceBar(
+                      background: Container(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                              Theme.of(context).colorScheme.tertiary.withOpacity(0.2),
+                              Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                              Colors.transparent,
+                            ],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                        child: const Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(height: 20),
+                              Text(
+                                '🐍 تعلم البرمجة',
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                'ابدأ رحلتك في عالم البرمجة',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  opacity: 0.7,
+                                ),
+                              ),
                             ],
                           ),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Icon(
-                          Icons.rocket_launch_rounded,
-                          size: 40,
-                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'مسارات جديدة قادمة',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    ),
+                  ),
+
+                  // User Card
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: AnimatedUserCard(
+                        userName: 'أحمد محمد',
+                        userLevel: 'مبتدئ',
+                        userAvatar: '👨‍💻',
+                        streakDays: 7,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'نعمل على إضافة مسارات جديدة مثل JavaScript و HTML/CSS وغيرها الكثير!',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        textAlign: TextAlign.center,
+                    ),
+                  ),
+
+                  // Tracks Section
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.school_rounded,
+                              color: Theme.of(context).colorScheme.primary,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'المسارات التعليمية',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const Text('سنخبرك عند إطلاق المسارات الجديدة!'),
-                              backgroundColor: Theme.of(context).colorScheme.primary,
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
+                    ),
+                  ),
+
+                  const SliverToBoxAdapter(child: SizedBox(height: 20)),
+
+                  // Tracks Grid
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final track = tracks[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 20),
+                            child: ModernTrackCard(
+                              track: track,
+                              onTap: () {
+                                context.push('/course/${track.id}');
+                              },
+                              animationDelay: Duration(milliseconds: 200 * index),
                             ),
                           );
                         },
-                        icon: const Icon(Icons.notifications_active_rounded),
-                        label: const Text('تنبيهني عند الإطلاق'),
+                        childCount: tracks.length,
                       ),
-                    ],
+                    ),
                   ),
-                ),
-                
-                const SizedBox(height: 24),
-              ],
+
+                  const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                ],
+              ),
             ),
           ),
         ),
