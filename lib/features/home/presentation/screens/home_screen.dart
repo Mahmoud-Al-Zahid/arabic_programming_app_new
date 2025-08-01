@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/data/repositories/python_repository.dart';
 import '../widgets/animated_user_card.dart';
 import '../widgets/modern_track_card.dart';
-import '../widgets/stats_overview.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -49,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       body: SafeArea(
         child: FadeTransition(
           opacity: _fadeAnimation,
@@ -59,9 +59,6 @@ class _HomeScreenState extends State<HomeScreen>
                 // Animated User Card
                 const AnimatedUserCard(),
                 
-                // Stats Overview
-                const StatsOverview(),
-                
                 const SizedBox(height: 16),
                 
                 // Learning Path Section
@@ -69,10 +66,17 @@ class _HomeScreenState extends State<HomeScreen>
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.school_rounded,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: 28,
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.school_rounded,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 24,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Text(
@@ -102,8 +106,8 @@ class _HomeScreenState extends State<HomeScreen>
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Theme.of(context).colorScheme.surfaceContainerHighest,
                         Theme.of(context).colorScheme.surfaceContainer,
+                        Theme.of(context).colorScheme.surface,
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -112,6 +116,13 @@ class _HomeScreenState extends State<HomeScreen>
                     border: Border.all(
                       color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
                   ),
                   child: Column(
                     children: [

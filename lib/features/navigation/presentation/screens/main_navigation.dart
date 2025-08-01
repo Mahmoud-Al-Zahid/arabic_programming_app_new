@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../home/presentation/screens/home_screen.dart';
+import '../../../profile/presentation/screens/profile_screen.dart';
 
 class MainNavigation extends StatefulWidget {
   final Widget child;
+  final String location;
 
-  const MainNavigation({super.key, required this.child});
+  const MainNavigation({
+    super.key,
+    required this.child,
+    required this.location,
+  });
 
   @override
   State<MainNavigation> createState() => _MainNavigationState();
@@ -38,19 +45,16 @@ class _MainNavigationState extends State<MainNavigation>
     super.dispose();
   }
 
-  int _calculateSelectedIndex(BuildContext context) {
-    final String location = GoRouterState.of(context).uri.path;
-    if (location.startsWith('/home')) {
+  int _getCurrentIndex() {
+    if (widget.location.startsWith('/home') || widget.location == '/') {
       return 0;
-    }
-    if (location.startsWith('/profile')) {
+    } else if (widget.location.startsWith('/profile')) {
       return 1;
     }
     return 0;
   }
 
-  void _onItemTapped(int index) {
-    // Add tap animation
+  void _onDestinationSelected(int index) {
     _animationController.forward().then((_) {
       _animationController.reverse();
     });
@@ -88,22 +92,32 @@ class _MainNavigationState extends State<MainNavigation>
           ],
         ),
         child: NavigationBar(
-          selectedIndex: _calculateSelectedIndex(context),
-          onDestinationSelected: _onItemTapped,
-          animationDuration: const Duration(milliseconds: 300),
+          selectedIndex: _getCurrentIndex(),
+          onDestinationSelected: _onDestinationSelected,
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          indicatorColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+          height: 80,
           destinations: [
             NavigationDestination(
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
+                  color: _getCurrentIndex() == 0
+                      ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.home_outlined),
+                child: Icon(
+                  Icons.home_rounded,
+                  color: _getCurrentIndex() == 0
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
               selectedIcon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -117,14 +131,22 @@ class _MainNavigationState extends State<MainNavigation>
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
+                  color: _getCurrentIndex() == 1
+                      ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.person_outline_rounded),
+                child: Icon(
+                  Icons.person_rounded,
+                  color: _getCurrentIndex() == 1
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
               selectedIcon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
