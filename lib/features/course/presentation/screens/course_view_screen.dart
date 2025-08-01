@@ -1,33 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/data/repositories/python_repository.dart';
-import '../../../../core/constants/app_constants.dart';
+import '../../../core/data/repositories/python_repository.dart';
 
-class CourseViewScreen extends StatefulWidget {
+class CourseViewScreen extends ConsumerStatefulWidget {
   final String trackId;
 
   const CourseViewScreen({super.key, required this.trackId});
 
   @override
-  State<CourseViewScreen> createState() => _CourseViewScreenState();
+  ConsumerState<CourseViewScreen> createState() => _CourseViewScreenState();
 }
 
-class _CourseViewScreenState extends State<CourseViewScreen>
+class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
     with TickerProviderStateMixin {
   late AnimationController _headerController;
-  late AnimationController _lessonsController;
+  late AnimationController _pathController;
+  late List<AnimationController> _lessonControllers;
   late Animation<double> _headerAnimation;
-  late Animation<double> _lessonsAnimation;
 
   @override
   void initState() {
     super.initState();
+    
     _headerController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    _lessonsController = AnimationController(
-      duration: const Duration(milliseconds: 1200),
+
+    _pathController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
 
@@ -36,412 +38,341 @@ class _CourseViewScreenState extends State<CourseViewScreen>
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: _headerController,
-      curve: Curves.easeOut,
-    ));
-
-    _lessonsAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _lessonsController,
       curve: Curves.easeOutCubic,
     ));
 
+    // Initialize lesson controllers
+    final repository = PythonRepository();
+    final lessons = repository.getLessonsByTrackId(widget.trackId);
+    _lessonControllers = List.generate(
+      lessons.length,
+      (index) => AnimationController(
+        duration: const Duration(milliseconds: 600),
+        vsync: this,
+      ),
+    );
+
+    // Start animations
     _headerController.forward();
-    Future.delayed(const Duration(milliseconds: 300), () {
-      _lessonsController.forward();
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        _pathController.forward();
+        _startLessonAnimations();
+      }
     });
+  }
+
+  void _startLessonAnimations() {
+    for (int i = 0; i < _lessonControllers.length; i++) {
+      Future.delayed(Duration(milliseconds: 200 * i), () {
+        if (mounted) {
+          _lessonControllers[i].forward();
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
     _headerController.dispose();
-    _lessonsController.dispose();
+    _pathController.dispose();
+    for (var controller in _lessonControllers) {
+      controller.dispose();
+    }
     super.dispose();
-  }
-
-  void _navigateToLesson(BuildContext context, String lessonId) {
-    context.push('/lesson/$lessonId');
-  }
-
-  void _showLockedDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: Text(
-            'درس مقفل 🔒',
-            style: Theme.of(context).textTheme.headlineSmall,
-            textAlign: TextAlign.center,
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Icon(
-                  Icons.lock_rounded,
-                  size: 40,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'يجب إكمال الدروس السابقة أولاً',
-                style: Theme.of(context).textTheme.bodyLarge,
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('حسناً'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final track = PythonRepository.pythonTrack;
-    final lessons = [
-      {'id': 'python_hello', 'title': 'البداية', 'isUnlocked': true, 'isCompleted': false},
-      {'id': 'python_variables', 'title': 'المتغيرات', 'isUnlocked': false, 'isCompleted': false},
-      {'id': 'python_data', 'title': 'العمل مع البيانات', 'isUnlocked': false, 'isCompleted': false},
-      {'id': 'python_functions', 'title': 'الدوال', 'isUnlocked': false, 'isCompleted': false},
-      {'id': 'python_loops', 'title': 'الحلقات', 'isUnlocked': false, 'isCompleted': false},
-      {'id': 'python_project', 'title': 'المشروع النهائي', 'isUnlocked': false, 'isCompleted': false},
-    ];
+    final repository = PythonRepository();
+    final track = repository.getTrackById(widget.trackId);
+    final lessons = repository.getLessonsByTrackId(widget.trackId);
+
+    if (track == null) {
+      return const Scaffold(
+        body: Center(child: Text('المسار غير موجود')),
+      );
+    }
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF4A90E2),
-              Color(0xFF7BB3F0),
-              Color(0xFFF8FAFF),
-            ],
-            stops: [0.0, 0.4, 1.0],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Header Section
-              FadeTransition(
-                opacity: _headerAnimation,
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      // Top Bar
-                      Row(
-                        children: [
-                          IconButton(
-                            onPressed: () => context.pop(),
-                            icon: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.arrow_back_ios_rounded,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            // Animated Header - Python X Style
+            SliverToBoxAdapter(
+              child: AnimatedBuilder(
+                animation: _headerAnimation,
+                builder: (context, child) {
+                  return Transform.translate(
+                    offset: Offset(0, -50 * (1 - _headerAnimation.value)),
+                    child: Opacity(
+                      opacity: _headerAnimation.value,
+                      child: Container(
+                        height: 120,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              const Color(0xFF4A90E2),
+                              const Color(0xFF357ABD),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
-                          const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  width: 32,
-                                  height: 32,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          child: Row(
+                            children: [
+                              // Back Button
+                              GestureDetector(
+                                onTap: () => context.pop(),
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(16),
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: const Center(
-                                    child: Text(
-                                      '🐍',
-                                      style: TextStyle(fontSize: 18),
+                                  child: const Icon(
+                                    Icons.arrow_back_ios,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              
+                              // Python Logo and Title
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: const Icon(
+                                      Icons.code,
+                                      color: Colors.white,
+                                      size: 24,
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Text(
-                                  'PYTHON X',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'PYTHON X',
+                                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1.2,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const Spacer(),
-                          IconButton(
-                            onPressed: () {},
-                            icon: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(12),
+                                ],
                               ),
-                              child: const Icon(
-                                Icons.search_rounded,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      const SizedBox(height: 20),
-                      
-                      // Welcome Message
-                      Text(
-                        '${AppConstants.mockUserName}، مرحباً بك في عالم Python',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Lessons Path
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.only(top: 20),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
-                    ),
-                  ),
-                  child: AnimatedBuilder(
-                    animation: _lessonsAnimation,
-                    builder: (context, child) {
-                      return SingleChildScrollView(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 20),
-                            ...lessons.asMap().entries.map((entry) {
-                              final index = entry.key;
-                              final lesson = entry.value;
-                              final isLeft = index % 2 == 0;
                               
-                              return AnimatedOpacity(
-                                opacity: _lessonsAnimation.value,
-                                duration: Duration(milliseconds: (300 + (index * 100)).toInt()),
-                                child: AnimatedSlide(
-                                  offset: Offset(
-                                    isLeft ? -0.3 * (1 - _lessonsAnimation.value) : 0.3 * (1 - _lessonsAnimation.value),
-                                    0,
-                                  ),
-                                  duration: Duration(milliseconds: (500 + (index * 100)).toInt()),
-                                  curve: Curves.easeOutCubic,
-                                  child: _buildLessonCard(lesson, index, isLeft),
+                              const Spacer(),
+                              
+                              // Search Icon
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                              );
-                            }).toList(),
-                            const SizedBox(height: 100),
-                          ],
+                                child: const Icon(
+                                  Icons.search,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      );
-                    },
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // Welcome Message
+            SliverToBoxAdapter(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                child: Text(
+                  'John, Welcome to the world of Python',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+
+            // Learning Path
+            SliverToBoxAdapter(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    for (int index = 0; index < lessons.length; index++)
+                      AnimatedBuilder(
+                        animation: _lessonControllers[index],
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scale: 0.8 + (0.2 * _lessonControllers[index].value),
+                            child: Opacity(
+                              opacity: _lessonControllers[index].value,
+                              child: _buildLessonCard(
+                                lessons[index],
+                                index,
+                                lessons.length,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Bottom Spacing
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 100),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildLessonCard(Map<String, dynamic> lesson, int index, bool isLeft) {
+  Widget _buildLessonCard(lesson, int index, int totalLessons) {
+    final isEven = index % 2 == 0;
     final colors = [
-      [const Color(0xFF4A90E2), const Color(0xFF7BB3F0)], // Blue
-      [const Color(0xFF8E44AD), const Color(0xFFBB6BD9)], // Purple
-      [const Color(0xFF27AE60), const Color(0xFF58D68D)], // Green
-      [const Color(0xFFE67E22), const Color(0xFFF39C12)], // Orange
-      [const Color(0xFFE91E63), const Color(0xFFF48FB1)], // Pink
-      [const Color(0xFFFFD700), const Color(0xFFFFF176)], // Gold
+      const Color(0xFF4A90E2), // Blue
+      const Color(0xFF9B59B6), // Purple
+      const Color(0xFF2ECC71), // Green
+      const Color(0xFFE67E22), // Orange
+      const Color(0xFFE91E63), // Pink
+      const Color(0xFFF39C12), // Gold
     ];
     
     final icons = [
-      Icons.rocket_launch_rounded,
-      Icons.storage_rounded,
-      Icons.computer_rounded,
-      Icons.functions_rounded,
-      Icons.loop_rounded,
-      Icons.emoji_events_rounded,
+      Icons.rocket_launch,
+      Icons.storage,
+      Icons.computer,
+      Icons.functions,
+      Icons.loop,
+      Icons.emoji_events,
     ];
 
-    final colorPair = colors[index % colors.length];
-    final icon = icons[index % icons.length];
-    final isCompleted = lesson['isCompleted'] as bool;
-    final isLocked = !(lesson['isUnlocked'] as bool);
+    final cardColor = colors[index % colors.length];
+    final cardIcon = icons[index % icons.length];
 
     return Container(
-      margin: EdgeInsets.only(
-        bottom: 30,
-        left: isLeft ? 0 : 60,
-        right: isLeft ? 60 : 0,
-      ),
-      child: Stack(
+      margin: const EdgeInsets.only(bottom: 30),
+      child: Row(
         children: [
-          // Connecting Line
-          if (index < 5)
-            Positioned(
-              top: 80,
-              left: isLeft ? 120 : -60,
-              child: SizedBox(
-                width: 80,
-                height: 2,
-                child: CustomPaint(
-                  painter: DottedLinePainter(
-                    color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
-                  ),
-                ),
-              ),
-            ),
-
+          if (!isEven) const Spacer(),
+          
           // Lesson Card
-          GestureDetector(
-            onTap: isLocked ? () => _showLockedDialog(context) : () {
-              _navigateToLesson(context, lesson['id'] as String);
-            },
-            child: Container(
-              width: 200,
-              height: 120,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: isLocked 
-                    ? [Colors.grey.shade300, Colors.grey.shade400]
-                    : colorPair,
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+          Expanded(
+            flex: 2,
+            child: GestureDetector(
+              onTap: () => context.go('/lesson/${lesson.id}'),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: cardColor.withOpacity(0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
                 ),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: (isLocked ? Colors.grey : colorPair[0]).withOpacity(0.3),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Stack(
-                children: [
-                  // Background Pattern
-                  Positioned(
-                    top: -20,
-                    right: -20,
-                    child: Container(
-                      width: 80,
-                      height: 80,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Icon
+                    Container(
+                      width: 50,
+                      height: 50,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
-                        shape: BoxShape.circle,
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: Icon(
+                        cardIcon,
+                        color: Colors.white,
+                        size: 24,
                       ),
                     ),
-                  ),
-                  
-                  // Content
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Icon
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            isLocked ? Icons.lock_rounded : icon,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                        ),
-                        
-                        const Spacer(),
-                        
-                        // Title
-                        Text(
-                          '${index + 1}. ${lesson['title']}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                    const SizedBox(height: 12),
+                    
+                    // Title
+                    Text(
+                      '${index + 1}. ${lesson.title}',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  
-                  // Status Badge
-                  if (isCompleted)
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: Colors.green,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
-                        ),
-                        child: const Icon(
-                          Icons.check_rounded,
+                    const SizedBox(height: 8),
+                    
+                    // Description
+                    Text(
+                      lesson.description,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 12),
+                    
+                    // Status Badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Text(
+                        lesson.isCompleted ? 'مكتمل' : lesson.isUnlocked ? 'متاح' : 'مقفل',
+                        style: const TextStyle(
                           color: Colors.white,
-                          size: 14,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
+          
+          if (isEven) const Spacer(),
+          
+          // Connection Line (except for last item)
+          if (index < totalLessons - 1)
+            Container(
+              width: 2,
+              height: 50,
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(1),
+              ),
+              child: CustomPaint(
+                painter: DottedLinePainter(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -460,17 +391,17 @@ class DottedLinePainter extends CustomPainter {
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
 
-    const dashWidth = 5.0;
+    const dashHeight = 5.0;
     const dashSpace = 3.0;
-    double startX = 0;
+    double startY = 0;
 
-    while (startX < size.width) {
+    while (startY < size.height) {
       canvas.drawLine(
-        Offset(startX, size.height / 2),
-        Offset(startX + dashWidth, size.height / 2),
+        Offset(size.width / 2, startY),
+        Offset(size.width / 2, startY + dashHeight),
         paint,
       );
-      startX += dashWidth + dashSpace;
+      startY += dashHeight + dashSpace;
     }
   }
 

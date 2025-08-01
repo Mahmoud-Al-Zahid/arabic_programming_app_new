@@ -1,103 +1,122 @@
 import '../models/track_model.dart';
 import '../models/lesson_model.dart';
 import '../models/quiz_model.dart';
+import 'package:flutter/material.dart';
 
 class PythonRepository {
-  static const TrackModel pythonTrack = TrackModel(
-    id: 'python',
-    title: 'Python - الثعبان الودود',
-    icon: '🐍',
-    isAccessible: true,
-    progress: 0.15,
-    lessonsCount: 20,
-    description: 'تعلم لغة البايثون من الصفر إلى الاحتراف',
-  );
+  List<Track> getTracks() {
+    return [
+      Track(
+        id: 'python-basics',
+        title: 'أساسيات Python',
+        description: 'تعلم أساسيات لغة البرمجة Python من الصفر',
+        icon: Icons.code,
+        color: const Color(0xFF4A90E2),
+        progress: 0.3,
+        lessonsCount: 12,
+        duration: '4 ساعات',
+        isUnlocked: true,
+      ),
+    ];
+  }
 
-  static const LessonModel pythonDemoLesson = LessonModel(
-    id: 'python_hello',
-    title: 'مرحباً بايثون',
-    trackId: 'python',
-    slides: [
-      SlideModel(
-        title: 'ما هي لغة البايثون؟',
-        content: 'البايثون هي لغة برمجة سهلة التعلم وقوية في نفس الوقت. تستخدم في تطوير المواقع، الذكاء الاصطناعي، وتحليل البيانات.',
-        code: 'print("مرحباً بالعالم!")',
-        hasCode: true,
-      ),
-      SlideModel(
-        title: 'لماذا نتعلم البايثون؟',
-        content: 'البايثون مناسبة للمبتدئين لأنها سهلة القراءة والفهم. كما أنها تستخدم في شركات كبيرة مثل جوجل ونتفليكس.',
-        code: 'name = "أحمد"\nprint(f"مرحباً {name}!")',
-        hasCode: true,
-      ),
-      SlideModel(
-        title: 'ملخص الدرس',
-        content: 'تعلمنا في هذا الدرس:\n• ما هي لغة البايثون\n• لماذا هي مهمة\n• كيفية كتابة أول برنامج',
-        hasCode: false,
-      ),
-    ],
-  );
+  Track? getTrackById(String id) {
+    final tracks = getTracks();
+    try {
+      return tracks.firstWhere((track) => track.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
 
-  static const QuizModel sampleQuiz = QuizModel(
-    id: 'python_hello_quiz',
-    title: 'اختبار: مرحباً بايثون',
-    lessonId: 'python_hello',
-    questions: [
-      QuestionModel(
-        id: 'q1',
-        type: 'multiple_choice',
-        question: 'ما هي الدالة المستخدمة لطباعة النص في البايثون؟',
-        options: ['print()', 'show()', 'display()', 'output()'],
+  List<Lesson> getLessonsByTrackId(String trackId) {
+    return [
+      Lesson(
+        id: 'lesson-1',
+        title: 'Getting Started',
+        description: 'مقدمة في Python وإعداد البيئة',
+        content: 'محتوى الدرس الأول...',
+        trackId: trackId,
+        isUnlocked: true,
+        isCompleted: true,
+        order: 1,
+      ),
+      Lesson(
+        id: 'lesson-2',
+        title: 'Variables & Data Types',
+        description: 'تعلم المتغيرات وأنواع البيانات',
+        content: 'محتوى الدرس الثاني...',
+        trackId: trackId,
+        isUnlocked: true,
+        isCompleted: false,
+        order: 2,
+      ),
+      Lesson(
+        id: 'lesson-3',
+        title: 'Working with Functions',
+        description: 'كيفية إنشاء واستخدام الدوال',
+        content: 'محتوى الدرس الثالث...',
+        trackId: trackId,
+        isUnlocked: true,
+        isCompleted: false,
+        order: 3,
+      ),
+      Lesson(
+        id: 'lesson-4',
+        title: 'Control Structures',
+        description: 'الشروط والحلقات في Python',
+        content: 'محتوى الدرس الرابع...',
+        trackId: trackId,
+        isUnlocked: false,
+        isCompleted: false,
+        order: 4,
+      ),
+      Lesson(
+        id: 'lesson-5',
+        title: 'Object-Oriented Programming',
+        description: 'البرمجة الكائنية في Python',
+        content: 'محتوى الدرس الخامس...',
+        trackId: trackId,
+        isUnlocked: false,
+        isCompleted: false,
+        order: 5,
+      ),
+      Lesson(
+        id: 'lesson-6',
+        title: 'Final Project',
+        description: 'مشروع نهائي لتطبيق ما تعلمته',
+        content: 'محتوى المشروع النهائي...',
+        trackId: trackId,
+        isUnlocked: false,
+        isCompleted: false,
+        order: 6,
+      ),
+    ];
+  }
+
+  Lesson? getLessonById(String id) {
+    final allLessons = getLessonsByTrackId('python-basics');
+    try {
+      return allLessons.firstWhere((lesson) => lesson.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  List<Quiz> getQuizzesByLessonId(String lessonId) {
+    return [
+      Quiz(
+        id: 'quiz-1',
+        lessonId: lessonId,
+        question: 'ما هي الطريقة الصحيحة لطباعة "Hello World" في Python؟',
+        options: [
+          'print("Hello World")',
+          'echo "Hello World"',
+          'console.log("Hello World")',
+          'printf("Hello World")',
+        ],
         correctAnswer: 0,
       ),
-      QuestionModel(
-        id: 'q2',
-        type: 'fill_blank',
-        question: 'أكمل الكود التالي لطباعة "مرحباً بالعالم"',
-        code: '___("مرحباً بالعالم")',
-        correctAnswer: 'print',
-      ),
-      QuestionModel(
-        id: 'q3',
-        type: 'drag_drop',
-        question: 'رتب الكود التالي بالترتيب الصحيح:',
-        codeBlocks: ['name = "أحمد"', 'print(f"مرحباً {name}!")'],
-        correctOrder: [0, 1],
-        correctAnswer: [0, 1],
-      ),
-    ],
-  );
-
-  static List<Map<String, dynamic>> getPythonUnits() {
-    return [
-      {
-        'id': 'unit_1',
-        'title': 'الوحدة الأولى: المقدمة',
-        'lessons': 3,
-        'isUnlocked': true,
-        'isCompleted': true,
-      },
-      {
-        'id': 'unit_2',
-        'title': 'الوحدة الثانية: الأساسيات',
-        'lessons': 4,
-        'isUnlocked': true,
-        'isCompleted': false,
-      },
-      {
-        'id': 'unit_3',
-        'title': 'الوحدة الثالثة: التطبيق',
-        'lessons': 5,
-        'isUnlocked': false,
-        'isCompleted': false,
-      },
-      {
-        'id': 'unit_4',
-        'title': 'الوحدة الرابعة: المشاريع',
-        'lessons': 3,
-        'isUnlocked': false,
-        'isCompleted': false,
-      },
     ];
   }
 }

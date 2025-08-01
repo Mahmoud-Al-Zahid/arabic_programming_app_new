@@ -28,7 +28,7 @@ final GoRouter appRouter = GoRouter(
     ),
     ShellRoute(
       builder: (context, state, child) => MainNavigation(
-        location: state.location,
+        location: state.uri.path,
         child: child,
       ),
       routes: [
@@ -62,7 +62,13 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/results',
-      builder: (context, state) => const ResultsScreen(),
+      builder: (context, state) => ResultsScreen(
+        results: state.extra as Map<String, dynamic>? ?? {
+          'score': 0,
+          'total': 0,
+          'percentage': 0,
+        },
+      ),
     ),
   ],
 );

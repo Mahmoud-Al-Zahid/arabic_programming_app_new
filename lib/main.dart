@@ -24,7 +24,6 @@ class ArabicProgrammingApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
-    final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
       title: 'تعلم البرمجة بالعربية',
@@ -48,7 +47,7 @@ class ArabicProgrammingApp extends ConsumerWidget {
       ],
       
       // Router Configuration
-      routerConfig: router,
+      routerConfig: appRouter,
       
       // RTL Support
       builder: (context, child) {
