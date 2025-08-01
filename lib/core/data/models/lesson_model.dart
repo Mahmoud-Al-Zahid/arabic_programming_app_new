@@ -1,47 +1,37 @@
-class LessonModel {
+class Lesson {
   final String id;
   final String title;
+  final String description;
+  final String content;
   final String trackId;
-  final List<SlideModel> slides;
+  final bool isUnlocked;
+  final bool isCompleted;
+  final int order;
+  final List<Slide>? slides;
 
-  const LessonModel({
+  const Lesson({
     required this.id,
     required this.title,
+    required this.description,
+    required this.content,
     required this.trackId,
-    required this.slides,
+    required this.isUnlocked,
+    required this.isCompleted,
+    required this.order,
+    this.slides,
   });
-
-  factory LessonModel.fromJson(Map<String, dynamic> json) {
-    return LessonModel(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      trackId: json['trackId'] as String,
-      slides: (json['slides'] as List)
-          .map((slide) => SlideModel.fromJson(slide as Map<String, dynamic>))
-          .toList(),
-    );
-  }
 }
 
-class SlideModel {
+class Slide {
   final String title;
   final String content;
   final String? code;
   final bool hasCode;
 
-  const SlideModel({
+  const Slide({
     required this.title,
     required this.content,
     this.code,
     required this.hasCode,
   });
-
-  factory SlideModel.fromJson(Map<String, dynamic> json) {
-    return SlideModel(
-      title: json['title'] as String,
-      content: json['content'] as String,
-      code: json['code'] as String?,
-      hasCode: json['hasCode'] as bool,
-    );
-  }
 }

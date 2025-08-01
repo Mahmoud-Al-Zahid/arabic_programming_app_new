@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/constants/app_constants.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -13,41 +12,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final List<OnboardingSlide> _slides = [
-    const OnboardingSlide(
-      title: 'تعلم البايثون بالعربية بسهولة',
-      subtitle: 'منصة شاملة لتعلم لغة البايثون من الصفر',
-      icon: Icons.code,
-      color: Color(0xFF2979FF),
+  final List<OnboardingPage> _pages = [
+    OnboardingPage(
+      title: 'تعلم البرمجة بسهولة',
+      description: 'ابدأ رحلتك في تعلم البرمجة مع دروس تفاعلية ومبسطة',
+      icon: Icons.school,
+      color: const Color(0xFF4A90E2),
     ),
-    const OnboardingSlide(
-      title: 'تعلم واربح النقاط والمستويات',
-      subtitle: 'نظام تفاعلي مع XP ومستويات وعملات',
-      icon: Icons.emoji_events,
-      color: Color(0xFF00E676),
+    OnboardingPage(
+      title: 'تطبيق عملي',
+      description: 'طبق ما تتعلمه من خلال مشاريع حقيقية وتمارين تفاعلية',
+      icon: Icons.build,
+      color: const Color(0xFF9B59B6),
     ),
-    const OnboardingSlide(
-      title: 'اختبارات وتحديات تفاعلية',
-      subtitle: 'طور مهاراتك من خلال التطبيق العملي',
-      icon: Icons.quiz,
-      color: Color(0xFFFF6B35),
+    OnboardingPage(
+      title: 'تتبع التقدم',
+      description: 'راقب تقدمك واحصل على شهادات عند إكمال المسارات',
+      icon: Icons.trending_up,
+      color: const Color(0xFF2ECC71),
     ),
   ];
-
-  void _nextPage() {
-    if (_currentPage < _slides.length - 1) {
-      _pageController.nextPage(
-        duration: AppConstants.defaultAnimationDuration,
-        curve: Curves.easeInOut,
-      );
-    } else {
-      context.go('/registration');
-    }
-  }
-
-  void _skipToRegistration() {
-    context.go('/registration');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,44 +39,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header with indicators and skip button
-            Padding(
-              padding: const EdgeInsets.all(AppConstants.defaultPadding),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const SizedBox(width: 60),
-                  // Page Indicators
-                  Row(
-                    children: List.generate(
-                      _slides.length,
-                      (index) => Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        width: _currentPage == index ? 24 : 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: _currentPage == index
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Skip Button
-                  TextButton(
-                    onPressed: _skipToRegistration,
-                    child: Text(
-                      'تخطي',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // PageView
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
@@ -101,88 +47,132 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     _currentPage = index;
                   });
                 },
-                itemCount: _slides.length,
+                itemCount: _pages.length,
                 itemBuilder: (context, index) {
-                  final slide = _slides[index];
-                  return Padding(
-                    padding: const EdgeInsets.all(AppConstants.largePadding),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Illustration
-                        Container(
-                          width: 200,
-                          height: 200,
-                          decoration: BoxDecoration(
-                            color: slide.color.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(100),
-                          ),
-                          child: Icon(
-                            slide.icon,
-                            size: 100,
-                            color: slide.color,
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-                        // Title
-                        Text(
-                          slide.title,
-                          style: Theme.of(context).textTheme.headlineLarge,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        // Subtitle
-                        Text(
-                          slide.subtitle,
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  );
+                  return _buildPage(_pages[index]);
                 },
               ),
             ),
-            // Next Button
-            Padding(
-              padding: const EdgeInsets.all(AppConstants.largePadding),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _nextPage,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: Text(
-                    _currentPage == _slides.length - 1 ? 'ابدأ الآن' : 'التالي',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            _buildBottomSection(),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildPage(OnboardingPage page) {
+    return Padding(
+      padding: const EdgeInsets.all(40),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 150,
+            height: 150,
+            decoration: BoxDecoration(
+              color: page.color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(75),
+            ),
+            child: Icon(
+              page.icon,
+              size: 80,
+              color: page.color,
+            ),
+          ),
+          const SizedBox(height: 50),
+          Text(
+            page.title,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: page.color,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            page.description,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomSection() {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              _pages.length,
+              (index) => Container(
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                width: _currentPage == index ? 24 : 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: _currentPage == index
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.outline,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 30),
+          Row(
+            children: [
+              if (_currentPage > 0)
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {
+                      _pageController.previousPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                    child: const Text('السابق'),
+                  ),
+                ),
+              if (_currentPage > 0) const SizedBox(width: 16),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_currentPage < _pages.length - 1) {
+                      _pageController.nextPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    } else {
+                      context.go('/registration');
+                    }
+                  },
+                  child: Text(
+                    _currentPage < _pages.length - 1 ? 'التالي' : 'ابدأ الآن',
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class OnboardingSlide {
+class OnboardingPage {
   final String title;
-  final String subtitle;
+  final String description;
   final IconData icon;
   final Color color;
 
-  const OnboardingSlide({
+  OnboardingPage({
     required this.title,
-    required this.subtitle,
+    required this.description,
     required this.icon,
     required this.color,
   });

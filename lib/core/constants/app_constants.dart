@@ -1,6 +1,6 @@
 class AppConstants {
   // App Info
-  static const String appName = 'تعلم البرمجة بالعربية';
+  static const String appName = 'تعلم البرمجة';
   static const String appVersion = '1.0.0';
 
   // Animation Durations
@@ -13,12 +13,12 @@ class AppConstants {
   static const double largePadding = 24.0;
 
   // Border Radius
-  static const double defaultBorderRadius = 16.0;
+  static const double defaultBorderRadius = 12.0;
   static const double smallBorderRadius = 8.0;
   static const double largeBorderRadius = 24.0;
 
   // Elevation
-  static const double cardElevation = 3.0;
+  static const double cardElevation = 4.0;
   static const double buttonElevation = 2.0;
 
   // Mock User Data

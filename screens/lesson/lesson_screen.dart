@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/data/repositories/python_repository.dart';
+import '../../constants/app_constants.dart';
+import '../quiz/quiz_screen.dart';
+import '../../constants/mock_data.dart';
 
 class LessonScreen extends StatefulWidget {
-  final String lessonId;
+  final Map<String, dynamic> lesson;
 
-  const LessonScreen({super.key, required this.lessonId});
+  const LessonScreen({super.key, required this.lesson});
 
   @override
   State<LessonScreen> createState() => _LessonScreenState();
@@ -14,15 +14,12 @@ class LessonScreen extends StatefulWidget {
 
 class _LessonScreenState extends State<LessonScreen> {
   int _currentSlide = 0;
-  late List<dynamic> _slides;
-  late String _lessonTitle;
+  late List<Map<String, dynamic>> _slides;
 
   @override
   void initState() {
     super.initState();
-    final lesson = PythonRepository.pythonDemoLesson;
-    _slides = lesson.slides ?? [];
-    _lessonTitle = lesson.title;
+    _slides = List<Map<String, dynamic>>.from(widget.lesson['slides']);
   }
 
   void _nextSlide() {
@@ -44,7 +41,22 @@ class _LessonScreenState extends State<LessonScreen> {
   }
 
   void _navigateToQuiz() {
-    context.pushReplacement('/quiz/python_hello_quiz');
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            QuizScreen(quiz: MockData.sampleQuiz),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(1.0, 0.0),
+              end: Offset.zero,
+            ).animate(animation),
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+      ),
+    );
   }
 
   void _showExitDialog() {
@@ -64,8 +76,8 @@ class _LessonScreenState extends State<LessonScreen> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
-                context.pop();
+                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(context).pop(); // Close lesson
               },
               child: Text(
                 'إنهاء',
@@ -80,18 +92,14 @@ class _LessonScreenState extends State<LessonScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_slides.isEmpty) {
-      return const Scaffold(
-        body: Center(child: Text('لا توجد شرائح متاحة')),
-      );
-    }
-
     final currentSlideData = _slides[_currentSlide];
     final isLastSlide = _currentSlide == _slides.length - 1;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_lessonTitle),
+        title: Text(widget.lesson['title']),
+        centerTitle: true,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: _showExitDialog,
@@ -141,7 +149,7 @@ class _LessonScreenState extends State<LessonScreen> {
                   children: [
                     // Slide Title
                     Text(
-                      currentSlideData.title,
+                      currentSlideData['title'],
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -160,7 +168,7 @@ class _LessonScreenState extends State<LessonScreen> {
                         ),
                       ),
                       child: Text(
-                        currentSlideData.content,
+                        currentSlideData['content'],
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           height: 1.6,
                         ),
@@ -168,15 +176,15 @@ class _LessonScreenState extends State<LessonScreen> {
                     ),
 
                     // Code Block (if exists)
-                    if (currentSlideData.hasCode && currentSlideData.code != null) ...[
+                    if (currentSlideData['hasCode'] == true) ...[
                       const SizedBox(height: 24),
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(AppConstants.defaultPadding),
                         decoration: BoxDecoration(
                           color: Theme.of(context).brightness == Brightness.dark
-                              ? Theme.of(context).colorScheme.surfaceContainerHighest
-                              : Theme.of(context).colorScheme.surfaceContainerHigh,
+                              ? Colors.grey[900]
+                              : Colors.grey[100],
                           borderRadius: BorderRadius.circular(AppConstants.defaultBorderRadius),
                           border: Border.all(
                             color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
@@ -204,10 +212,11 @@ class _LessonScreenState extends State<LessonScreen> {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              currentSlideData.code!,
-                              style: const TextStyle(
+                              currentSlideData['code'],
+                              style: TextStyle(
                                 fontFamily: 'monospace',
                                 fontSize: 14,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                           ],

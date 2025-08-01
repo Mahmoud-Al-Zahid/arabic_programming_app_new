@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/data/repositories/python_repository.dart';
+import '../../../../core/data/repositories/python_repository.dart';
 import '../widgets/animated_user_card.dart';
 import '../widgets/modern_track_card.dart';
 
@@ -108,7 +108,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             ),
 
             // User Card
-            SliverToBoxAdapter(
+            const SliverToBoxAdapter(
               child: AnimatedUserCard(
                 userName: 'أحمد محمد',
                 level: 5,

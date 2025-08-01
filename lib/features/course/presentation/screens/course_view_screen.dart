@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/data/repositories/python_repository.dart';
+import '../../../../core/data/repositories/python_repository.dart';
 
 class CourseViewScreen extends ConsumerStatefulWidget {
   final String trackId;
@@ -109,11 +109,11 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
                       opacity: _headerAnimation.value,
                       child: Container(
                         height: 120,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              const Color(0xFF4A90E2),
-                              const Color(0xFF357ABD),
+                              Color(0xFF4A90E2),
+                              Color(0xFF357ABD),
                             ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,

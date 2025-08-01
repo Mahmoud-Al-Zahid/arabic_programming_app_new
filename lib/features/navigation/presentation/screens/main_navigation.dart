@@ -15,48 +15,37 @@ class MainNavigation extends StatefulWidget {
   State<MainNavigation> createState() => _MainNavigationState();
 }
 
-class _MainNavigationState extends State<MainNavigation>
-    with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
+class _MainNavigationState extends State<MainNavigation> {
+  int _selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _updateSelectedIndex();
   }
 
   @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  int _getCurrentIndex() {
-    if (widget.location.startsWith('/home') || widget.location == '/') {
-      return 0;
-    } else if (widget.location.startsWith('/profile')) {
-      return 1;
+  void didUpdateWidget(MainNavigation oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.location != widget.location) {
+      _updateSelectedIndex();
     }
-    return 0;
   }
 
-  void _onDestinationSelected(int index) {
-    _animationController.forward().then((_) {
-      _animationController.reverse();
-    });
+  void _updateSelectedIndex() {
+    switch (widget.location) {
+      case '/home':
+        _selectedIndex = 0;
+        break;
+      case '/profile':
+        _selectedIndex = 1;
+        break;
+      default:
+        _selectedIndex = 0;
+    }
+  }
 
+  void _onItemTapped(int index) {
     switch (index) {
       case 0:
         context.go('/home');
@@ -70,92 +59,22 @@ class _MainNavigationState extends State<MainNavigation>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedBuilder(
-        animation: _scaleAnimation,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            child: widget.child,
-          );
-        },
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: NavigationBar(
-          selectedIndex: _getCurrentIndex(),
-          onDestinationSelected: _onDestinationSelected,
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          indicatorColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-          height: 80,
-          destinations: [
-            NavigationDestination(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: _getCurrentIndex() == 0
-                      ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.home_rounded,
-                  color: _getCurrentIndex() == 0
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              selectedIcon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.home_rounded,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              label: 'الرئيسية',
-            ),
-            NavigationDestination(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: _getCurrentIndex() == 1
-                      ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.person_rounded,
-                  color: _getCurrentIndex() == 1
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              selectedIcon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.person_rounded,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              label: 'الملف الشخصي',
-            ),
-          ],
-        ),
+      body: widget.child,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: _onItemTapped,
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'الرئيسية',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'الملف الشخصي',
+          ),
+        ],
       ),
     );
   }

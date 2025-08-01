@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/data/repositories/python_repository.dart';
+import '../../constants/app_constants.dart';
+import '../results/results_screen.dart';
 
 class QuizScreen extends StatefulWidget {
-  final String quizId;
+  final Map<String, dynamic> quiz;
 
-  const QuizScreen({super.key, required this.quizId});
+  const QuizScreen({super.key, required this.quiz});
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -15,15 +14,12 @@ class QuizScreen extends StatefulWidget {
 class _QuizScreenState extends State<QuizScreen> {
   int _currentQuestion = 0;
   final Map<int, dynamic> _answers = {};
-  late List<dynamic> _questions;
-  late String _quizTitle;
+  late List<Map<String, dynamic>> _questions;
 
   @override
   void initState() {
     super.initState();
-    final quiz = PythonRepository.sampleQuiz;
-    _questions = [quiz];
-    _quizTitle = 'اختبار Python';
+    _questions = List<Map<String, dynamic>>.from(widget.quiz['questions']);
   }
 
   void _selectAnswer(dynamic answer) {
@@ -51,14 +47,26 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   void _finishQuiz() {
-    // Calculate score
+    // Calculate score (mock calculation)
     int correctAnswers = 0;
     for (int i = 0; i < _questions.length; i++) {
       final question = _questions[i];
       final userAnswer = _answers[i];
       
-      if (userAnswer == question.correctAnswer) {
-        correctAnswers++;
+      if (question['type'] == 'multiple_choice') {
+        if (userAnswer == question['correctAnswer']) {
+          correctAnswers++;
+        }
+      } else if (question['type'] == 'fill_blank') {
+        if (userAnswer?.toString().toLowerCase() == 
+            question['correctAnswer'].toString().toLowerCase()) {
+          correctAnswers++;
+        }
+      } else if (question['type'] == 'drag_drop') {
+        // Simple check for drag and drop
+        if (userAnswer != null && userAnswer.length == question['correctOrder'].length) {
+          correctAnswers++;
+        }
       }
     }
 
@@ -70,18 +78,27 @@ class _QuizScreenState extends State<QuizScreen> {
       'questions': _questions,
     };
 
-    context.pushReplacement('/results', extra: results);
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            ResultsScreen(results: results),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+      ),
+    );
   }
 
-  Widget _buildMultipleChoiceQuestion(dynamic question) {
-    final options = question.options as List<String>;
+  Widget _buildMultipleChoiceQuestion(Map<String, dynamic> question) {
+    final options = List<String>.from(question['options']);
     final selectedAnswer = _answers[_currentQuestion];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          question.question,
+          question['question'],
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -152,6 +169,171 @@ class _QuizScreenState extends State<QuizScreen> {
     );
   }
 
+  Widget _buildFillBlankQuestion(Map<String, dynamic> question) {
+    final controller = TextEditingController();
+    if (_answers[_currentQuestion] != null) {
+      controller.text = _answers[_currentQuestion].toString();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          question['question'],
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 24),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppConstants.defaultPadding),
+          decoration: BoxDecoration(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.grey[900]
+                : Colors.grey[100],
+            borderRadius: BorderRadius.circular(AppConstants.defaultBorderRadius),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+            ),
+          ),
+          child: Text(
+            question['code'],
+            style: TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 16,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'اكتب إجابتك هنا',
+            border: OutlineInputBorder(),
+            hintText: 'أكمل الكود المفقود',
+          ),
+          onChanged: (value) => _selectAnswer(value),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDragDropQuestion(Map<String, dynamic> question) {
+    final codeBlocks = List<String>.from(question['codeBlocks']);
+    final userOrder = _answers[_currentQuestion] as List<int>? ?? [];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          question['question'],
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'اسحب الكتل لترتيبها بالشكل الصحيح:',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 16),
+        
+        // Drop Zone
+        Container(
+          width: double.infinity,
+          min: 120,
+          padding: const EdgeInsets.all(AppConstants.defaultPadding),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(AppConstants.defaultBorderRadius),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+              style: BorderStyle.solid,
+            ),
+          ),
+          child: Column(
+            children: userOrder.map((index) {
+              return Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                child: Text(
+                  codeBlocks[index],
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 14,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+        const SizedBox(height: 16),
+        
+        // Available Blocks
+        Text(
+          'الكتل المتاحة:',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 8),
+        ...codeBlocks.asMap().entries.map((entry) {
+          final index = entry.key;
+          final block = entry.value;
+          final isUsed = userOrder.contains(index);
+
+          if (isUsed) return const SizedBox.shrink();
+
+          return Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(bottom: 8),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  final newOrder = List<int>.from(userOrder);
+                  newOrder.add(index);
+                  _selectAnswer(newOrder);
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                  ),
+                ),
+                child: Text(
+                  block,
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+        
+        // Reset Button
+        if (userOrder.isNotEmpty)
+          TextButton(
+            onPressed: () => _selectAnswer(<int>[]),
+            child: const Text('إعادة تعيين'),
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentQuestion = _questions[_currentQuestion];
@@ -160,7 +342,9 @@ class _QuizScreenState extends State<QuizScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_quizTitle),
+        title: Text(widget.quiz['title']),
+        centerTitle: true,
+        elevation: 0,
       ),
       body: SafeArea(
         child: Column(
@@ -193,7 +377,7 @@ class _QuizScreenState extends State<QuizScreen> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              '05:00',
+                              '05:00', // Mock timer
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.bold,
@@ -220,7 +404,18 @@ class _QuizScreenState extends State<QuizScreen> {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(AppConstants.defaultPadding),
-                child: _buildMultipleChoiceQuestion(currentQuestion),
+                child: () {
+                  switch (currentQuestion['type']) {
+                    case 'multiple_choice':
+                      return _buildMultipleChoiceQuestion(currentQuestion);
+                    case 'fill_blank':
+                      return _buildFillBlankQuestion(currentQuestion);
+                    case 'drag_drop':
+                      return _buildDragDropQuestion(currentQuestion);
+                    default:
+                      return const Text('نوع سؤال غير مدعوم');
+                  }
+                }(),
               ),
             ),
 

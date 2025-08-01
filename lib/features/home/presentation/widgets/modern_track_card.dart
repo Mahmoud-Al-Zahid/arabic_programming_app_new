@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/data/models/track_model.dart';
+import '../../../../core/data/models/track_model.dart';
 
 class ModernTrackCard extends StatefulWidget {
   final Track track;

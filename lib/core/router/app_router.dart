@@ -11,7 +11,7 @@ import '../../features/quiz/presentation/screens/quiz_screen.dart';
 import '../../features/results/presentation/screens/results_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 
-final GoRouter appRouter = GoRouter(
+final appRouter = GoRouter(
   initialLocation: '/splash',
   routes: [
     GoRoute(
@@ -27,10 +27,12 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const RegistrationScreen(),
     ),
     ShellRoute(
-      builder: (context, state, child) => MainNavigation(
-        location: state.uri.path,
-        child: child,
-      ),
+      builder: (context, state, child) {
+        return MainNavigation(
+          child: child,
+          location: state.uri.path,
+        );
+      },
       routes: [
         GoRoute(
           path: '/home',
@@ -44,31 +46,31 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/course/:trackId',
-      builder: (context, state) => CourseViewScreen(
-        trackId: state.pathParameters['trackId']!,
-      ),
+      builder: (context, state) {
+        final trackId = state.pathParameters['trackId']!;
+        return CourseViewScreen(trackId: trackId);
+      },
     ),
     GoRoute(
       path: '/lesson/:lessonId',
-      builder: (context, state) => LessonScreen(
-        lessonId: state.pathParameters['lessonId']!,
-      ),
+      builder: (context, state) {
+        final lessonId = state.pathParameters['lessonId']!;
+        return LessonScreen(lessonId: lessonId);
+      },
     ),
     GoRoute(
       path: '/quiz/:quizId',
-      builder: (context, state) => QuizScreen(
-        quizId: state.pathParameters['quizId']!,
-      ),
+      builder: (context, state) {
+        final quizId = state.pathParameters['quizId']!;
+        return QuizScreen(quizId: quizId);
+      },
     ),
     GoRoute(
       path: '/results',
-      builder: (context, state) => ResultsScreen(
-        results: state.extra as Map<String, dynamic>? ?? {
-          'score': 0,
-          'total': 0,
-          'percentage': 0,
-        },
-      ),
+      builder: (context, state) {
+        final results = state.extra as Map<String, dynamic>? ?? {};
+        return ResultsScreen(results: results);
+      },
     ),
   ],
 );

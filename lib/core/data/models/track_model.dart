@@ -1,43 +1,25 @@
-class TrackModel {
+import 'package:flutter/material.dart';
+
+class Track {
   final String id;
   final String title;
-  final String icon;
-  final bool isAccessible;
+  final String description;
+  final IconData icon;
+  final Color color;
   final double progress;
   final int lessonsCount;
-  final String description;
+  final String duration;
+  final bool isUnlocked;
 
-  const TrackModel({
+  const Track({
     required this.id,
     required this.title,
+    required this.description,
     required this.icon,
-    required this.isAccessible,
+    required this.color,
     required this.progress,
     required this.lessonsCount,
-    required this.description,
+    required this.duration,
+    required this.isUnlocked,
   });
-
-  factory TrackModel.fromJson(Map<String, dynamic> json) {
-    return TrackModel(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      icon: json['icon'] as String,
-      isAccessible: json['isAccessible'] as bool,
-      progress: (json['progress'] as num).toDouble(),
-      lessonsCount: json['lessonsCount'] as int,
-      description: json['description'] as String,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'icon': icon,
-      'isAccessible': isAccessible,
-      'progress': progress,
-      'lessonsCount': lessonsCount,
-      'description': description,
-    };
-  }
 }
