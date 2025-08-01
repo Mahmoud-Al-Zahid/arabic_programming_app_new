@@ -1,0 +1,20 @@
+{
+  "@@locale": "en",
+  "appTitle": "Learn Programming in Arabic",
+  "welcome": "Welcome",
+  "home": "Home",
+  "profile": "Profile",
+  "settings": "Settings",
+  "level": "Level",
+  "coins": "Coins",
+  "lessons": "Lessons",
+  "next": "Next",
+  "previous": "Previous",
+  "start": "Start",
+  "finish": "Finish",
+  "cancel": "Cancel",
+  "ok": "OK",
+  "loading": "Loading...",
+  "error": "An error occurred",
+  "retry": "Retry"
+}
