@@ -8,6 +8,7 @@ class Lesson {
   final bool isCompleted;
   final int order;
   final List<Slide>? slides;
+  final String? backgroundImage;
 
   const Lesson({
     required this.id,
@@ -19,7 +20,34 @@ class Lesson {
     required this.isCompleted,
     required this.order,
     this.slides,
+    this.backgroundImage,
   });
+
+  Lesson copyWith({
+    String? id,
+    String? title,
+    String? description,
+    String? content,
+    String? trackId,
+    bool? isUnlocked,
+    bool? isCompleted,
+    int? order,
+    List<Slide>? slides,
+    String? backgroundImage,
+  }) {
+    return Lesson(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      content: content ?? this.content,
+      trackId: trackId ?? this.trackId,
+      isUnlocked: isUnlocked ?? this.isUnlocked,
+      isCompleted: isCompleted ?? this.isCompleted,
+      order: order ?? this.order,
+      slides: slides ?? this.slides,
+      backgroundImage: backgroundImage ?? this.backgroundImage,
+    );
+  }
 }
 
 class Slide {
@@ -32,6 +60,6 @@ class Slide {
     required this.title,
     required this.content,
     this.code,
-    required this.hasCode,
+    this.hasCode = false,
   });
 }

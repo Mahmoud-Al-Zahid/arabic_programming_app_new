@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/registration_screen.dart';
@@ -26,23 +26,13 @@ final appRouter = GoRouter(
       path: '/registration',
       builder: (context, state) => const RegistrationScreen(),
     ),
-    ShellRoute(
-      builder: (context, state, child) {
-        return MainNavigation(
-          child: child,
-          location: state.uri.path,
-        );
-      },
-      routes: [
-        GoRoute(
-          path: '/home',
-          builder: (context, state) => const HomeScreen(),
-        ),
-        GoRoute(
-          path: '/profile',
-          builder: (context, state) => const ProfileScreen(),
-        ),
-      ],
+    GoRoute(
+      path: '/main',
+      builder: (context, state) => const MainNavigation(),
+    ),
+    GoRoute(
+      path: '/home',
+      builder: (context, state) => const HomeScreen(),
     ),
     GoRoute(
       path: '/course/:trackId',
@@ -68,9 +58,13 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/results',
       builder: (context, state) {
-        final results = state.extra as Map<String, dynamic>? ?? {};
+        final results = state.extra as Map<String, dynamic>?;
         return ResultsScreen(results: results);
       },
+    ),
+    GoRoute(
+      path: '/profile',
+      builder: (context, state) => const ProfileScreen(),
     ),
   ],
 );

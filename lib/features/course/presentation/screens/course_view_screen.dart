@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/data/repositories/python_repository.dart';
+import '../../../../core/providers/data_providers.dart';
 
 class CourseViewScreen extends ConsumerStatefulWidget {
   final String trackId;
@@ -41,16 +41,7 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
       curve: Curves.easeOutCubic,
     ));
 
-    // Initialize lesson controllers
-    final repository = PythonRepository();
-    final lessons = repository.getLessonsByTrackId(widget.trackId);
-    _lessonControllers = List.generate(
-      lessons.length,
-      (index) => AnimationController(
-        duration: const Duration(milliseconds: 600),
-        vsync: this,
-      ),
-    );
+    _lessonControllers = [];
 
     // Start animations
     _headerController.forward();
@@ -65,11 +56,27 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
   void _startLessonAnimations() {
     for (int i = 0; i < _lessonControllers.length; i++) {
       Future.delayed(Duration(milliseconds: 200 * i), () {
-        if (mounted) {
+        if (mounted && i < _lessonControllers.length) {
           _lessonControllers[i].forward();
         }
       });
     }
+  }
+
+  void _initializeLessonControllers(int count) {
+    // Dispose existing controllers
+    for (var controller in _lessonControllers) {
+      controller.dispose();
+    }
+    
+    // Create new controllers
+    _lessonControllers = List.generate(
+      count,
+      (index) => AnimationController(
+        duration: const Duration(milliseconds: 600),
+        vsync: this,
+      ),
+    );
   }
 
   @override
@@ -84,163 +91,191 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
 
   @override
   Widget build(BuildContext context) {
-    final repository = PythonRepository();
-    final track = repository.getTrackById(widget.trackId);
-    final lessons = repository.getLessonsByTrackId(widget.trackId);
-
-    if (track == null) {
-      return const Scaffold(
-        body: Center(child: Text('المسار غير موجود')),
-      );
-    }
+    final trackAsync = ref.watch(trackByIdProvider(widget.trackId));
+    final lessonsAsync = ref.watch(lessonsByTrackIdProvider(widget.trackId));
 
     return Scaffold(
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            // Animated Header - Python X Style
-            SliverToBoxAdapter(
-              child: AnimatedBuilder(
-                animation: _headerAnimation,
-                builder: (context, child) {
-                  return Transform.translate(
-                    offset: Offset(0, -50 * (1 - _headerAnimation.value)),
-                    child: Opacity(
-                      opacity: _headerAnimation.value,
-                      child: Container(
-                        height: 120,
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Color(0xFF4A90E2),
-                              Color(0xFF357ABD),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                          child: Row(
-                            children: [
-                              // Back Button
-                              GestureDetector(
-                                onTap: () => context.pop(),
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: const Icon(
-                                    Icons.arrow_back_ios,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                ),
+        child: trackAsync.when(
+          data: (track) {
+            if (track == null) {
+              return const Center(child: Text('المسار غير موجود'));
+            }
+
+            return CustomScrollView(
+              slivers: [
+                // Animated Header - Python X Style
+                SliverToBoxAdapter(
+                  child: AnimatedBuilder(
+                    animation: _headerAnimation,
+                    builder: (context, child) {
+                      return Transform.translate(
+                        offset: Offset(0, -50 * (1 - _headerAnimation.value)),
+                        child: Opacity(
+                          opacity: _headerAnimation.value,
+                          child: Container(
+                            height: 120,
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Color(0xFF4A90E2),
+                                  Color(0xFF357ABD),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                               ),
-                              const SizedBox(width: 16),
-                              
-                              // Python Logo and Title
-                              Row(
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                              child: Row(
                                 children: [
+                                  // Back Button
+                                  GestureDetector(
+                                    onTap: () => context.pop(),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: const Icon(
+                                        Icons.arrow_back_ios,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  
+                                  // Python Logo and Title
+                                  Row(
+                                    children: [
+                                      Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.2),
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        child: const Icon(
+                                          Icons.code,
+                                          color: Colors.white,
+                                          size: 24,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        'PYTHON X',
+                                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 1.2,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  
+                                  const Spacer(),
+                                  
+                                  // Search Icon
                                   Container(
-                                    width: 40,
-                                    height: 40,
+                                    padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
                                       color: Colors.white.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(20),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: const Icon(
-                                      Icons.code,
+                                      Icons.search,
                                       color: Colors.white,
-                                      size: 24,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    'PYTHON X',
-                                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 1.2,
+                                      size: 20,
                                     ),
                                   ),
                                 ],
                               ),
-                              
-                              const Spacer(),
-                              
-                              // Search Icon
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Icon(
-                                  Icons.search,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            // Welcome Message
-            SliverToBoxAdapter(
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                child: Text(
-                  'John, Welcome to the world of Python',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurface,
+                      );
+                    },
                   ),
                 ),
-              ),
-            ),
 
-            // Learning Path
-            SliverToBoxAdapter(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  children: [
-                    for (int index = 0; index < lessons.length; index++)
-                      AnimatedBuilder(
-                        animation: _lessonControllers[index],
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: 0.8 + (0.2 * _lessonControllers[index].value),
-                            child: Opacity(
-                              opacity: _lessonControllers[index].value,
-                              child: _buildLessonCard(
-                                lessons[index],
-                                index,
-                                lessons.length,
-                              ),
-                            ),
-                          );
-                        },
+                // Welcome Message
+                SliverToBoxAdapter(
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      'John, Welcome to the world of Python',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
-                  ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
 
-            // Bottom Spacing
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 100),
-            ),
-          ],
+                // Learning Path
+                lessonsAsync.when(
+                  data: (lessons) {
+                    // Initialize controllers when data is loaded
+                    if (_lessonControllers.length != lessons.length) {
+                      _initializeLessonControllers(lessons.length);
+                      Future.delayed(const Duration(milliseconds: 100), () {
+                        _startLessonAnimations();
+                      });
+                    }
+
+                    return SliverToBoxAdapter(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          children: [
+                            for (int index = 0; index < lessons.length; index++)
+                              if (index < _lessonControllers.length)
+                                AnimatedBuilder(
+                                  animation: _lessonControllers[index],
+                                  builder: (context, child) {
+                                    return Transform.scale(
+                                      scale: 0.8 + (0.2 * _lessonControllers[index].value),
+                                      child: Opacity(
+                                        opacity: _lessonControllers[index].value,
+                                        child: _buildLessonCard(
+                                          lessons[index],
+                                          index,
+                                          lessons.length,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                )
+                              else
+                                _buildLessonCard(lessons[index], index, lessons.length),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                  loading: () => const SliverToBoxAdapter(
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (error, stack) => SliverToBoxAdapter(
+                    child: Center(
+                      child: Text('حدث خطأ في تحميل الدروس: $error'),
+                    ),
+                  ),
+                ),
+
+                // Bottom Spacing
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 100),
+                ),
+              ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(
+            child: Text('حدث خطأ في تحميل المسار: $error'),
+          ),
         ),
       ),
     );

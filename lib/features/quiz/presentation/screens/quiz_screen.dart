@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/providers/data_providers.dart';
 import '../../../../core/data/repositories/python_repository.dart';
 
-class QuizScreen extends StatefulWidget {
+class QuizScreen extends ConsumerStatefulWidget {
   final String quizId;
 
   const QuizScreen({super.key, required this.quizId});
 
   @override
-  State<QuizScreen> createState() => _QuizScreenState();
+  ConsumerState<QuizScreen> createState() => _QuizScreenState();
 }
 
-class _QuizScreenState extends State<QuizScreen> {
+class _QuizScreenState extends ConsumerState<QuizScreen> {
   int _currentQuestion = 0;
   final Map<int, dynamic> _answers = {};
   late List<dynamic> _questions;

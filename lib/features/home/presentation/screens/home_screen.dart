@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/data/repositories/python_repository.dart';
+import '../../../../core/providers/data_providers.dart';
 import '../widgets/animated_user_card.dart';
 import '../widgets/modern_track_card.dart';
 
@@ -43,8 +43,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    final repository = PythonRepository();
-    final tracks = repository.getTracks();
+    final tracksAsync = ref.watch(tracksProvider);
+    final userAsync = ref.watch(currentUserProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -108,12 +108,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             ),
 
             // User Card
-            const SliverToBoxAdapter(
-              child: AnimatedUserCard(
-                userName: 'أحمد محمد',
-                level: 5,
-                xp: 1250,
-                coins: 850,
+            SliverToBoxAdapter(
+              child: userAsync.when(
+                data: (user) => AnimatedUserCard(
+                  userName: user.name,
+                  level: user.level,
+                  xp: user.xp,
+                  coins: user.coins,
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => const AnimatedUserCard(
+                  userName: 'مستخدم',
+                  level: 1,
+                  xp: 0,
+                  coins: 0,
+                ),
               ),
             ),
 
@@ -131,15 +140,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             ),
 
             // Tracks List
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  return ModernTrackCard(
-                    track: tracks[index],
-                    animationDelay: Duration(milliseconds: 200 * index),
-                  );
-                },
-                childCount: tracks.length,
+            tracksAsync.when(
+              data: (tracks) => SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    return ModernTrackCard(
+                      track: tracks[index],
+                      animationDelay: Duration(milliseconds: 200 * index),
+                    );
+                  },
+                  childCount: tracks.length,
+                ),
+              ),
+              loading: () => const SliverToBoxAdapter(
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (error, stack) => SliverToBoxAdapter(
+                child: Center(
+                  child: Text('حدث خطأ في تحميل البيانات: $error'),
+                ),
               ),
             ),
 

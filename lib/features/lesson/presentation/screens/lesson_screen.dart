@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/providers/data_providers.dart';
 import '../../../../core/data/repositories/python_repository.dart';
 
-class LessonScreen extends StatefulWidget {
+class LessonScreen extends ConsumerStatefulWidget {
   final String lessonId;
 
   const LessonScreen({super.key, required this.lessonId});
 
   @override
-  State<LessonScreen> createState() => _LessonScreenState();
+  ConsumerState<LessonScreen> createState() => _LessonScreenState();
 }
 
-class _LessonScreenState extends State<LessonScreen> {
+class _LessonScreenState extends ConsumerState<LessonScreen> {
   int _currentSlide = 0;
   late List<dynamic> _slides;
   late String _lessonTitle;
