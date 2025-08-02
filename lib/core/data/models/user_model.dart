@@ -8,21 +8,17 @@ class User {
   final int coins;
   final List<String> completedLessons;
   final List<String> unlockedTracks;
-  final DateTime createdAt;
-  final DateTime lastActiveAt;
 
   const User({
     required this.id,
     required this.name,
     required this.email,
     this.avatarUrl,
-    required this.level,
-    required this.xp,
-    required this.coins,
-    required this.completedLessons,
-    required this.unlockedTracks,
-    required this.createdAt,
-    required this.lastActiveAt,
+    this.level = 1,
+    this.xp = 0,
+    this.coins = 0,
+    this.completedLessons = const [],
+    this.unlockedTracks = const [],
   });
 
   User copyWith({
@@ -35,8 +31,6 @@ class User {
     int? coins,
     List<String>? completedLessons,
     List<String>? unlockedTracks,
-    DateTime? createdAt,
-    DateTime? lastActiveAt,
   }) {
     return User(
       id: id ?? this.id,
@@ -48,8 +42,48 @@ class User {
       coins: coins ?? this.coins,
       completedLessons: completedLessons ?? this.completedLessons,
       unlockedTracks: unlockedTracks ?? this.unlockedTracks,
-      createdAt: createdAt ?? this.createdAt,
-      lastActiveAt: lastActiveAt ?? this.lastActiveAt,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'email': email,
+      'avatarUrl': avatarUrl,
+      'level': level,
+      'xp': xp,
+      'coins': coins,
+      'completedLessons': completedLessons,
+      'unlockedTracks': unlockedTracks,
+    };
+  }
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'],
+      name: json['name'],
+      email: json['email'],
+      avatarUrl: json['avatarUrl'],
+      level: json['level'] ?? 1,
+      xp: json['xp'] ?? 0,
+      coins: json['coins'] ?? 0,
+      completedLessons: List<String>.from(json['completedLessons'] ?? []),
+      unlockedTracks: List<String>.from(json['unlockedTracks'] ?? []),
+    );
+  }
+
+  @override
+  String toString() {
+    return 'User(id: $id, name: $name, level: $level)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is User && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
 }

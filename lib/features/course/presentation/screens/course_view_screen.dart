@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/providers/data_providers.dart';
+import '../../../../core/constants/app_constants.dart';
 
 class CourseViewScreen extends ConsumerStatefulWidget {
   final String trackId;
@@ -48,9 +49,26 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         _pathController.forward();
-        _startLessonAnimations();
       }
     });
+  }
+
+  void _initializeLessonControllers(int lessonCount) {
+    // Dispose existing controllers
+    for (var controller in _lessonControllers) {
+      controller.dispose();
+    }
+    
+    // Create new controllers
+    _lessonControllers = List.generate(
+      lessonCount,
+      (index) => AnimationController(
+        duration: const Duration(milliseconds: 600),
+        vsync: this,
+      ),
+    );
+    
+    _startLessonAnimations();
   }
 
   void _startLessonAnimations() {
@@ -61,22 +79,6 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
         }
       });
     }
-  }
-
-  void _initializeLessonControllers(int count) {
-    // Dispose existing controllers
-    for (var controller in _lessonControllers) {
-      controller.dispose();
-    }
-    
-    // Create new controllers
-    _lessonControllers = List.generate(
-      count,
-      (index) => AnimationController(
-        duration: const Duration(milliseconds: 600),
-        vsync: this,
-      ),
-    );
   }
 
   @override
@@ -91,190 +93,243 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
 
   @override
   Widget build(BuildContext context) {
-    final trackAsync = ref.watch(trackByIdProvider(widget.trackId));
-    final lessonsAsync = ref.watch(lessonsByTrackIdProvider(widget.trackId));
+    final trackAsync = ref.watch(trackProvider(widget.trackId));
+    final lessonsAsync = ref.watch(lessonsProvider(widget.trackId));
 
     return Scaffold(
       body: SafeArea(
-        child: trackAsync.when(
-          data: (track) {
-            if (track == null) {
-              return const Center(child: Text('المسار غير موجود'));
-            }
+        child: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(trackProvider(widget.trackId));
+            ref.invalidate(lessonsProvider(widget.trackId));
+          },
+          child: trackAsync.when(
+            data: (track) {
+              if (track == null) {
+                return const Center(child: Text('المسار غير موجود'));
+              }
+              
+              return lessonsAsync.when(
+                data: (lessons) {
+                  // Initialize lesson controllers when data is loaded
+                  if (_lessonControllers.length != lessons.length) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _initializeLessonControllers(lessons.length);
+                    });
+                  }
+                  
+                  return CustomScrollView(
+                    slivers: [
+                      // Animated Header
+                      SliverToBoxAdapter(
+                        child: AnimatedBuilder(
+                          animation: _headerAnimation,
+                          builder: (context, child) {
+                            return Transform.translate(
+                              offset: Offset(0, -50 * (1 - _headerAnimation.value)),
+                              child: Opacity(
+                                opacity: _headerAnimation.value,
+                                child: Container(
+                                  height: 120,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        track.color,
+                                        track.color.withOpacity(0.8),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 16,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        // Back Button
+                                        GestureDetector(
+                                          onTap: () => context.pop(),
+                                          child: Container(
+                                            padding: const EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withOpacity(0.2),
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            child: const Icon(
+                                              Icons.arrow_back_ios,
+                                              color: Colors.white,
+                                              size: 20,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        
+                                        // Track Icon and Title
+                                        Row(
+                                          children: [
+                                            Container(
+                                              width: 40,
+                                              height: 40,
+                                              decoration: BoxDecoration(
+                                                color: Colors.white.withOpacity(0.2),
+                                                borderRadius: BorderRadius.circular(20),
+                                              ),
+                                              child: Icon(
+                                                track.icon,
+                                                color: Colors.white,
+                                                size: 24,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Text(
+                                              track.title.toUpperCase(),
+                                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                letterSpacing: 1.2,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        
+                                        const Spacer(),
+                                        
+                                        // Progress Info
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 6,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withOpacity(0.2),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Text(
+                                            '${(track.progress * 100).toInt()}%',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
 
-            return CustomScrollView(
-              slivers: [
-                // Animated Header - Python X Style
-                SliverToBoxAdapter(
-                  child: AnimatedBuilder(
-                    animation: _headerAnimation,
-                    builder: (context, child) {
-                      return Transform.translate(
-                        offset: Offset(0, -50 * (1 - _headerAnimation.value)),
-                        child: Opacity(
-                          opacity: _headerAnimation.value,
-                          child: Container(
-                            height: 120,
-                            decoration: const BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Color(0xFF4A90E2),
-                                  Color(0xFF357ABD),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
+                      // Welcome Message
+                      SliverToBoxAdapter(
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'مرحباً بك في عالم ${track.title}',
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                              child: Row(
-                                children: [
-                                  // Back Button
-                                  GestureDetector(
-                                    onTap: () => context.pop(),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: const Icon(
-                                        Icons.arrow_back_ios,
-                                        color: Colors.white,
-                                        size: 20,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  
-                                  // Python Logo and Title
-                                  Row(
-                                    children: [
-                                      Container(
-                                        width: 40,
-                                        height: 40,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.2),
-                                          borderRadius: BorderRadius.circular(20),
-                                        ),
-                                        child: const Icon(
-                                          Icons.code,
-                                          color: Colors.white,
-                                          size: 24,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Text(
-                                        'PYTHON X',
-                                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 1.2,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  
-                                  const Spacer(),
-                                  
-                                  // Search Icon
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: const Icon(
-                                      Icons.search,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                  ),
-                                ],
+                              const SizedBox(height: 8),
+                              Text(
+                                track.description,
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ),
-                      );
-                    },
-                  ),
-                ),
-
-                // Welcome Message
-                SliverToBoxAdapter(
-                  child: Container(
-                    padding: const EdgeInsets.all(20),
-                    child: Text(
-                      'John, Welcome to the world of Python',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onSurface,
                       ),
-                    ),
-                  ),
-                ),
 
-                // Learning Path
-                lessonsAsync.when(
-                  data: (lessons) {
-                    // Initialize controllers when data is loaded
-                    if (_lessonControllers.length != lessons.length) {
-                      _initializeLessonControllers(lessons.length);
-                      Future.delayed(const Duration(milliseconds: 100), () {
-                        _startLessonAnimations();
-                      });
-                    }
-
-                    return SliverToBoxAdapter(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          children: [
-                            for (int index = 0; index < lessons.length; index++)
-                              if (index < _lessonControllers.length)
-                                AnimatedBuilder(
-                                  animation: _lessonControllers[index],
-                                  builder: (context, child) {
-                                    return Transform.scale(
-                                      scale: 0.8 + (0.2 * _lessonControllers[index].value),
-                                      child: Opacity(
-                                        opacity: _lessonControllers[index].value,
-                                        child: _buildLessonCard(
-                                          lessons[index],
-                                          index,
-                                          lessons.length,
+                      // Learning Path
+                      SliverToBoxAdapter(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Column(
+                            children: [
+                              for (int index = 0; index < lessons.length; index++)
+                                if (index < _lessonControllers.length)
+                                  AnimatedBuilder(
+                                    animation: _lessonControllers[index],
+                                    builder: (context, child) {
+                                      return Transform.scale(
+                                        scale: 0.8 + (0.2 * _lessonControllers[index].value),
+                                        child: Opacity(
+                                          opacity: _lessonControllers[index].value,
+                                          child: _buildLessonCard(
+                                            lessons[index],
+                                            index,
+                                            lessons.length,
+                                          ),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                )
-                              else
-                                _buildLessonCard(lessons[index], index, lessons.length),
-                          ],
+                                      );
+                                    },
+                                  )
+                                else
+                                  _buildLessonCard(lessons[index], index, lessons.length),
+                            ],
+                          ),
                         ),
                       ),
-                    );
-                  },
-                  loading: () => const SliverToBoxAdapter(
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                  error: (error, stack) => SliverToBoxAdapter(
-                    child: Center(
-                      child: Text('حدث خطأ في تحميل الدروس: $error'),
-                    ),
-                  ),
-                ),
 
-                // Bottom Spacing
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: 100),
+                      // Bottom Spacing
+                      const SliverToBoxAdapter(
+                        child: SizedBox(height: 100),
+                      ),
+                    ],
+                  );
+                },
+                loading: () => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(50),
+                    child: CircularProgressIndicator(),
+                  ),
                 ),
-              ],
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(
-            child: Text('حدث خطأ في تحميل المسار: $error'),
+                error: (error, stack) => Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                      const SizedBox(height: 16),
+                      Text('خطأ في تحميل الدروس: $error'),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          ref.invalidate(lessonsProvider(widget.trackId));
+                        },
+                        child: const Text('إعادة المحاولة'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text('خطأ في تحميل المسار: $error'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      ref.invalidate(trackProvider(widget.trackId));
+                    },
+                    child: const Text('إعادة المحاولة'),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -283,15 +338,7 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
 
   Widget _buildLessonCard(lesson, int index, int totalLessons) {
     final isEven = index % 2 == 0;
-    final colors = [
-      const Color(0xFF4A90E2), // Blue
-      const Color(0xFF9B59B6), // Purple
-      const Color(0xFF2ECC71), // Green
-      const Color(0xFFE67E22), // Orange
-      const Color(0xFFE91E63), // Pink
-      const Color(0xFFF39C12), // Gold
-    ];
-    
+    final colors = AppConstants.trackColors;
     final icons = [
       Icons.rocket_launch,
       Icons.storage,
@@ -314,15 +361,17 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
           Expanded(
             flex: 2,
             child: GestureDetector(
-              onTap: () => context.go('/lesson/${lesson.id}'),
+              onTap: lesson.isUnlocked 
+                  ? () => context.go('/lesson/${lesson.id}')
+                  : null,
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: cardColor,
+                  color: lesson.isUnlocked ? cardColor : Colors.grey,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: cardColor.withOpacity(0.3),
+                      color: (lesson.isUnlocked ? cardColor : Colors.grey).withOpacity(0.3),
                       blurRadius: 15,
                       offset: const Offset(0, 8),
                     ),
@@ -331,19 +380,26 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Icon
-                    Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      child: Icon(
-                        cardIcon,
-                        color: Colors.white,
-                        size: 24,
-                      ),
+                    // Icon and Status
+                    Row(
+                      children: [
+                        Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          child: Icon(
+                            lesson.isCompleted ? Icons.check_circle : cardIcon,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                        const Spacer(),
+                        if (!lesson.isUnlocked)
+                          const Icon(Icons.lock, color: Colors.white, size: 20),
+                      ],
                     ),
                     const SizedBox(height: 12),
                     
@@ -368,21 +424,39 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
                     ),
                     const SizedBox(height: 12),
                     
-                    // Status Badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Text(
-                        lesson.isCompleted ? 'مكتمل' : lesson.isUnlocked ? 'متاح' : 'مقفل',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
+                    // Duration and Status
+                    Row(
+                      children: [
+                        Icon(Icons.access_time, color: Colors.white, size: 16),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${lesson.duration} دقيقة',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
                         ),
-                      ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            lesson.isCompleted 
+                                ? 'مكتمل' 
+                                : lesson.isUnlocked 
+                                    ? 'متاح' 
+                                    : 'مقفل',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -398,10 +472,6 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
               width: 2,
               height: 50,
               margin: const EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(1),
-              ),
               child: CustomPaint(
                 painter: DottedLinePainter(
                   color: Theme.of(context).colorScheme.outline.withOpacity(0.5),

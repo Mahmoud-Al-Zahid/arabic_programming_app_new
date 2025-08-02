@@ -48,125 +48,171 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     return Scaffold(
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            // Animated Header
-            SliverToBoxAdapter(
-              child: AnimatedBuilder(
-                animation: _headerAnimation,
-                builder: (context, child) {
-                  return Transform.translate(
-                    offset: Offset(0, 50 * (1 - _headerAnimation.value)),
-                    child: Opacity(
-                      opacity: _headerAnimation.value,
-                      child: Container(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'مرحباً بك',
-                                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: Theme.of(context).colorScheme.primary,
+        child: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(tracksProvider);
+            ref.invalidate(currentUserProvider);
+          },
+          child: CustomScrollView(
+            slivers: [
+              // Animated Header
+              SliverToBoxAdapter(
+                child: AnimatedBuilder(
+                  animation: _headerAnimation,
+                  builder: (context, child) {
+                    return Transform.translate(
+                      offset: Offset(0, 50 * (1 - _headerAnimation.value)),
+                      child: Opacity(
+                        opacity: _headerAnimation.value,
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'مرحباً بك',
+                                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context).colorScheme.primary,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      'ابدأ رحلتك في تعلم البرمجة',
-                                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                      Text(
+                                        'ابدأ رحلتك في تعلم البرمجة',
+                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                        ),
                                       ),
+                                    ],
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(15),
                                     ),
-                                  ],
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(15),
+                                    child: Icon(
+                                      Icons.notifications_outlined,
+                                      color: Theme.of(context).colorScheme.primary,
+                                    ),
                                   ),
-                                  child: Icon(
-                                    Icons.notifications_outlined,
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
+                    );
+                  },
+                ),
+              ),
+
+              // User Card
+              SliverToBoxAdapter(
+                child: userAsync.when(
+                  data: (user) => AnimatedUserCard(
+                    userName: user?.name ?? 'المستخدم',
+                    level: user?.level ?? 1,
+                    xp: user?.xp ?? 0,
+                    coins: user?.coins ?? 0,
+                    avatarUrl: user?.avatarUrl,
+                  ),
+                  loading: () => const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: CircularProgressIndicator(),
                     ),
-                  );
-                },
-              ),
-            ),
-
-            // User Card
-            SliverToBoxAdapter(
-              child: userAsync.when(
-                data: (user) => AnimatedUserCard(
-                  userName: user.name,
-                  level: user.level,
-                  xp: user.xp,
-                  coins: user.coins,
-                ),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => const AnimatedUserCard(
-                  userName: 'مستخدم',
-                  level: 1,
-                  xp: 0,
-                  coins: 0,
-                ),
-              ),
-            ),
-
-            // Section Title
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Text(
-                  'المسارات التعليمية',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+                  ),
+                  error: (error, stack) => Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Text('خطأ في تحميل بيانات المستخدم: $error'),
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            // Tracks List
-            tracksAsync.when(
-              data: (tracks) => SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    return ModernTrackCard(
-                      track: tracks[index],
-                      animationDelay: Duration(milliseconds: 200 * index),
-                    );
-                  },
-                  childCount: tracks.length,
+              // Section Title
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Text(
+                    'المسارات التعليمية',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
-              loading: () => const SliverToBoxAdapter(
-                child: Center(child: CircularProgressIndicator()),
-              ),
-              error: (error, stack) => SliverToBoxAdapter(
-                child: Center(
-                  child: Text('حدث خطأ في تحميل البيانات: $error'),
+
+              // Tracks List
+              tracksAsync.when(
+                data: (tracks) => SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      return ModernTrackCard(
+                        track: tracks[index],
+                        animationDelay: Duration(milliseconds: 200 * index),
+                      );
+                    },
+                    childCount: tracks.length,
+                  ),
+                ),
+                loading: () => const SliverToBoxAdapter(
+                  child: Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(50),
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                ),
+                error: (error, stack) => SliverToBoxAdapter(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'خطأ في تحميل المسارات',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            error.toString(),
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              ref.invalidate(tracksProvider);
+                            },
+                            child: const Text('إعادة المحاولة'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
 
-            // Bottom Spacing
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 100),
-            ),
-          ],
+              // Bottom Spacing
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 100),
+              ),
+            ],
+          ),
         ),
       ),
     );

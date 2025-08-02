@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/constants/app_constants.dart';
 
 class ResultsScreen extends StatefulWidget {
-  final Map<String, dynamic>? results;
+  final Map<String, dynamic> results;
 
-  const ResultsScreen({super.key, this.results});
+  const ResultsScreen({super.key, required this.results});
 
   @override
   State<ResultsScreen> createState() => _ResultsScreenState();
@@ -38,7 +37,7 @@ class _ResultsScreenState extends State<ResultsScreen>
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: _controller,
-      curve: Curves.easeIn,
+      curve: Curves.easeInOut,
     ));
 
     _controller.forward();
@@ -52,32 +51,21 @@ class _ResultsScreenState extends State<ResultsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final results = widget.results ?? {
-      'score': 0,
-      'total': 1,
-      'percentage': 0,
-    };
-
-    final score = results['score'] as int;
-    final total = results['total'] as int;
-    final percentage = results['percentage'] as int;
-
-    final isPassed = percentage >= 70;
-    final resultColor = isPassed 
-        ? Theme.of(context).colorScheme.secondary
-        : Theme.of(context).colorScheme.error;
+    final score = widget.results['score'] ?? 0;
+    final total = widget.results['total'] ?? 1;
+    final percentage = widget.results['percentage'] ?? 0;
 
     return Scaffold(
       body: SafeArea(
         child: AnimatedBuilder(
           animation: _controller,
           builder: (context, child) {
-            return FadeTransition(
-              opacity: _fadeAnimation,
-              child: ScaleTransition(
-                scale: _scaleAnimation,
+            return Transform.scale(
+              scale: _scaleAnimation.value,
+              child: Opacity(
+                opacity: _fadeAnimation.value,
                 child: Padding(
-                  padding: const EdgeInsets.all(AppConstants.defaultPadding),
+                  padding: const EdgeInsets.all(24),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -86,41 +74,42 @@ class _ResultsScreenState extends State<ResultsScreen>
                         width: 120,
                         height: 120,
                         decoration: BoxDecoration(
-                          color: resultColor.withOpacity(0.1),
-                          shape: BoxShape.circle,
+                          color: percentage >= 70
+                              ? Colors.green.withOpacity(0.1)
+                              : Colors.orange.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(60),
                         ),
                         child: Icon(
-                          isPassed ? Icons.check_circle : Icons.cancel,
+                          percentage >= 70 ? Icons.celebration : Icons.sentiment_satisfied,
                           size: 60,
-                          color: resultColor,
+                          color: percentage >= 70 ? Colors.green : Colors.orange,
                         ),
                       ),
                       const SizedBox(height: 32),
 
-                      // Result Title
+                      // Title
                       Text(
-                        isPassed ? 'مبروك!' : 'حاول مرة أخرى',
+                        percentage >= 70 ? 'ممتاز!' : 'جيد!',
                         style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: resultColor,
+                          color: percentage >= 70 ? Colors.green : Colors.orange,
                         ),
                       ),
                       const SizedBox(height: 16),
 
                       // Score
                       Text(
-                        '$percentage%',
-                        style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: resultColor,
-                        ),
+                        'النتيجة: $score من $total',
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 8),
 
+                      // Percentage
                       Text(
-                        '$score من $total إجابات صحيحة',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        '$percentage%',
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                       const SizedBox(height: 32),
@@ -138,7 +127,7 @@ class _ResultsScreenState extends State<ResultsScreen>
                           widthFactor: percentage / 100,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: resultColor,
+                              color: percentage >= 70 ? Colors.green : Colors.orange,
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -146,13 +135,13 @@ class _ResultsScreenState extends State<ResultsScreen>
                       ),
                       const SizedBox(height: 48),
 
-                      // Action Buttons
+                      // Buttons
                       Column(
                         children: [
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: () => context.go('/main'),
+                              onPressed: () => context.go('/home'),
                               child: const Text('العودة للرئيسية'),
                             ),
                           ),
