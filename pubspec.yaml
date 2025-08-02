@@ -1,5 +1,5 @@
 name: arabic_programming_app
-description: "تطبيق تعلم البرمجة بالعربية - تركيز على Python"
+description: "تطبيق تعلم البرمجة بالعربية - نظام JSON مرن وشامل"
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -12,15 +12,15 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-
+  
   # UI & Navigation
   cupertino_icons: ^1.0.6
   go_router: ^14.8.1
   google_fonts: ^6.1.0
-
+  
   # State Management
   flutter_riverpod: ^2.5.1
-
+  
   # Storage & Preferences
   shared_preferences: ^2.2.3
   path_provider: ^2.1.3
@@ -34,11 +34,20 @@ flutter:
   uses-material-design: true
   
   assets:
+    - assets/languages/
+    - assets/courses/
+    - assets/lessons/
+    - assets/lessons/python/
+    - assets/quizzes/
+    - assets/quizzes/lessons/
+    - assets/quizzes/levels/
     - assets/images/
+    - assets/images/avatars/
+    - assets/images/backgrounds/
     - assets/images/tracks/
     - assets/images/lessons/
-    - assets/images/avatars/
-    - assets/images/icons/
+    - assets/images/languages/
+    - assets/images/slides/
   
   fonts:
     - family: Cairo

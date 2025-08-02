@@ -1,68 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import '../../../home/presentation/screens/home_screen.dart';
+import '../../../profile/presentation/screens/profile_screen.dart';
 
 class MainNavigation extends StatefulWidget {
-  final Widget child;
-  final String location;
-
-  const MainNavigation({
-    super.key,
-    required this.child,
-    required this.location,
-  });
+  const MainNavigation({super.key});
 
   @override
   State<MainNavigation> createState() => _MainNavigationState();
 }
 
 class _MainNavigationState extends State<MainNavigation> {
-  int _selectedIndex = 0;
+  int _currentIndex = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _updateSelectedIndex();
-  }
-
-  @override
-  void didUpdateWidget(MainNavigation oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.location != widget.location) {
-      _updateSelectedIndex();
-    }
-  }
-
-  void _updateSelectedIndex() {
-    switch (widget.location) {
-      case '/home':
-        _selectedIndex = 0;
-        break;
-      case '/profile':
-        _selectedIndex = 1;
-        break;
-      default:
-        _selectedIndex = 0;
-    }
-  }
-
-  void _onItemTapped(int index) {
-    switch (index) {
-      case 0:
-        context.go('/home');
-        break;
-      case 1:
-        context.go('/profile');
-        break;
-    }
-  }
+  final List<Widget> _screens = [
+    const HomeScreen(),
+    const ProfileScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: widget.child,
+      body: _screens[_currentIndex],
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: _onItemTapped,
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),

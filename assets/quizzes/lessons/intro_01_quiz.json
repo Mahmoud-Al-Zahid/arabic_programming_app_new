@@ -1,0 +1,166 @@
+{
+  "id": "intro_01_quiz",
+  "type": "lesson",
+  "title": "اختبار: ما هو Python؟",
+  "timeLimit": 10,
+  "passingScore": 70,
+  "randomizeQuestions": true,
+  "showResults": "immediately",
+  "questions": [
+    {
+      "questionId": "q1_python_creator",
+      "questionType": "multiple_choice",
+      "questionText": "من هو مؤسس لغة Python؟",
+      "points": 10,
+      "options": [
+        {
+          "optionId": "a",
+          "text": "Guido van Rossum",
+          "isCorrect": true
+        },
+        {
+          "optionId": "b",
+          "text": "James Gosling",
+          "isCorrect": false
+        },
+        {
+          "optionId": "c",
+          "text": "Brendan Eich",
+          "isCorrect": false
+        },
+        {
+          "optionId": "d",
+          "text": "Dennis Ritchie",
+          "isCorrect": false
+        }
+      ],
+      "correctAnswer": "a",
+      "explanation": "Guido van Rossum هو مؤسس لغة Python، وقد أنشأها في عام 1991.",
+      "hints": ["فكر في الاسم الهولندي", "بدأ تطوير Python في أوائل التسعينات"]
+    },
+    {
+      "questionId": "q2_python_year",
+      "questionType": "multiple_choice",
+      "questionText": "في أي عام تم إنشاء Python؟",
+      "points": 10,
+      "options": [
+        {
+          "optionId": "a",
+          "text": "1989",
+          "isCorrect": false
+        },
+        {
+          "optionId": "b",
+          "text": "1991",
+          "isCorrect": true
+        },
+        {
+          "optionId": "c",
+          "text": "1995",
+          "isCorrect": false
+        },
+        {
+          "optionId": "d",
+          "text": "2000",
+          "isCorrect": false
+        }
+      ],
+      "correctAnswer": "b",
+      "explanation": "تم إنشاء Python في عام 1991 بواسطة Guido van Rossum."
+    },
+    {
+      "questionId": "q3_print_function",
+      "questionType": "multiple_choice",
+      "questionText": "ما هي الدالة المستخدمة لطباعة النص في Python؟",
+      "points": 15,
+      "codeSnippet": "# أي من هذه الدوال صحيحة؟\n_____(\"Hello, World!\")",
+      "options": [
+        {
+          "optionId": "a",
+          "text": "print()",
+          "isCorrect": true
+        },
+        {
+          "optionId": "b",
+          "text": "console.log()",
+          "isCorrect": false
+        },
+        {
+          "optionId": "c",
+          "text": "echo()",
+          "isCorrect": false
+        },
+        {
+          "optionId": "d",
+          "text": "printf()",
+          "isCorrect": false
+        }
+      ],
+      "correctAnswer": "a",
+      "explanation": "الدالة print() هي الدالة الأساسية لطباعة النصوص في Python.",
+      "commonWrongAnswers": ["console.log() تستخدم في JavaScript", "echo() تستخدم في PHP", "printf() تستخدم في C"]
+    },
+    {
+      "questionId": "q4_python_features",
+      "questionType": "multiple_choice",
+      "questionText": "أي من هذه ليست من مميزات Python؟",
+      "points": 10,
+      "options": [
+        {
+          "optionId": "a",
+          "text": "سهولة التعلم",
+          "isCorrect": false
+        },
+        {
+          "optionId": "b",
+          "text": "مفتوحة المصدر",
+          "isCorrect": false
+        },
+        {
+          "optionId": "c",
+          "text": "تحتاج فاصلة منقوطة في نهاية كل سطر",
+          "isCorrect": true
+        },
+        {
+          "optionId": "d",
+          "text": "مجتمع كبير ونشط",
+          "isCorrect": false
+        }
+      ],
+      "correctAnswer": "c",
+      "explanation": "Python لا تحتاج فاصلة منقوطة في نهاية الأسطر، هذا ما يجعلها أبسط من لغات أخرى."
+    },
+    {
+      "questionId": "q5_code_completion",
+      "questionType": "fill_blank",
+      "questionText": "أكمل الكود التالي لطباعة 'مرحباً بالعالم':",
+      "points": 15,
+      "codeSnippet": "_____(\"مرحباً بالعالم\")",
+      "correctAnswer": "print",
+      "explanation": "الدالة print() تستخدم لطباعة النصوص في Python.",
+      "hints": ["الدالة تبدأ بحرف p", "تستخدم لإظهار النتائج على الشاشة"]
+    }
+  ],
+  "feedback": {
+    "excellent": [
+      "ممتاز! أنت تفهم أساسيات Python بشكل رائع! 🎉",
+      "أحسنت! لديك فهم قوي للمفاهيم الأساسية! 🌟",
+      "رائع! أنت مستعد للانتقال للدرس التالي! 🚀"
+    ],
+    "good": [
+      "جيد جداً! أنت على الطريق الصحيح! 👍",
+      "أداء جيد! راجع النقاط التي أخطأت فيها وستكون مثالياً! 📚",
+      "جيد! مع قليل من المراجعة ستكون خبيراً! 💪"
+    ],
+    "average": [
+      "أداء مقبول، لكن يمكنك تحسينه! 📖",
+      "راجع الدرس مرة أخرى وأعد المحاولة! 🔄",
+      "لا تستسلم! المراجعة ستجعلك أفضل! 💡"
+    ],
+    "needsImprovement": [
+      "يحتاج الأمر لمزيد من المراجعة. لا تقلق، التعلم يحتاج وقت! 🌱",
+      "راجع الدرس بعناية وحاول مرة أخرى! 📚",
+      "لا تيأس! كل خبير كان مبتدئاً يوماً ما! 🌟"
+    ]
+  }
+}

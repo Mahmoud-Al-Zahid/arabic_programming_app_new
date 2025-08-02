@@ -1,0 +1,191 @@
+{
+  "lessonId": "variables_03",
+  "lessonTitle": "المتغيرات وأنواع البيانات",
+  "lessonDescription": "تعلم كيفية إنشاء واستخدام المتغيرات وأنواع البيانات المختلفة في Python",
+  "estimatedMinutes": 25,
+  "slides": [
+    {
+      "slideId": "variables_slide_1",
+      "type": "introduction",
+      "title": "ما هي المتغيرات؟ 📦",
+      "order": 1,
+      "content": {
+        "text": "المتغيرات هي حاويات لتخزين البيانات. في Python، يمكنك إنشاء متغير بسهولة عن طريق إعطائه اسماً وقيمة.",
+        "image": "assets/images/slides/variables_concept.png",
+        "analogy": {
+          "title": "تشبيه بسيط",
+          "description": "فكر في المتغير كصندوق له اسم، يمكنك وضع أشياء مختلفة بداخله واستخدامها لاحقاً."
+        }
+      }
+    },
+    {
+      "slideId": "variables_slide_2",
+      "type": "code_example",
+      "title": "إنشاء المتغيرات",
+      "order": 2,
+      "content": {
+        "text": "في Python، إنشاء المتغيرات بسيط جداً. لا حاجة لتعريف نوع البيانات مسبقاً!",
+        "codeSnippet": {
+          "code": "# إنشاء متغيرات مختلفة\nname = \"أحمد\"\nage = 25\nheight = 175.5\nis_student = True\n\n# طباعة المتغيرات\nprint(\"الاسم:\", name)\nprint(\"العمر:\", age)\nprint(\"الطول:\", height)\nprint(\"طالب؟\", is_student)",
+          "language": "python",
+          "explanation": "Python يحدد نوع البيانات تلقائياً بناءً على القيمة المعطاة. هذا ما يسمى بـ Dynamic Typing.",
+          "output": "الاسم: أحمد\nالعمر: 25\nالطول: 175.5\nطالب؟ True",
+          "isExecutable": true
+        },
+        "notes": [
+          "لا حاجة لكلمة var أو let كما في لغات أخرى",
+          "Python يحدد النوع تلقائياً",
+          "يمكن تغيير قيمة المتغير في أي وقت"
+        ]
+      }
+    },
+    {
+      "slideId": "variables_slide_3",
+      "type": "explanation",
+      "title": "أنواع البيانات الأساسية",
+      "order": 3,
+      "content": {
+        "text": "Python يحتوي على عدة أنواع أساسية من البيانات:",
+        "dataTypes": [
+          {
+            "type": "str (النصوص)",
+            "description": "لتخزين النصوص والكلمات",
+            "example": "\"مرحباً\" أو 'Python'",
+            "color": "#e74c3c"
+          },
+          {
+            "type": "int (الأعداد الصحيحة)",
+            "description": "للأعداد بدون فاصلة عشرية",
+            "example": "42, -17, 0",
+            "color": "#3498db"
+          },
+          {
+            "type": "float (الأعداد العشرية)",
+            "description": "للأعداد مع فاصلة عشرية",
+            "example": "3.14, -2.5, 0.0",
+            "color": "#2ecc71"
+          },
+          {
+            "type": "bool (القيم المنطقية)",
+            "description": "للقيم الصحيحة أو الخاطئة",
+            "example": "True أو False",
+            "color": "#f39c12"
+          }
+        ],
+        "image": "assets/images/slides/data_types.png"
+      }
+    },
+    {
+      "slideId": "variables_slide_4",
+      "type": "code_example",
+      "title": "معرفة نوع البيانات",
+      "order": 4,
+      "content": {
+        "text": "يمكنك استخدام الدالة type() لمعرفة نوع أي متغير:",
+        "codeSnippet": {
+          "code": "# أمثلة على أنواع البيانات المختلفة\ntext = \"مرحباً بالعالم\"\nnumber = 42\ndecimal = 3.14\nis_true = True\n\n# معرفة نوع كل متغير\nprint(type(text))    # <class 'str'>\nprint(type(number))  # <class 'int'>\nprint(type(decimal)) # <class 'float'>\nprint(type(is_true)) # <class 'bool'>",
+          "language": "python",
+          "explanation": "الدالة type() تخبرك بنوع البيانات لأي متغير. هذا مفيد جداً عند التطوير والتصحيح.",
+          "output": "<class 'str'>\n<class 'int'>\n<class 'float'>\n<class 'bool'>",
+          "isExecutable": true
+        }
+      }
+    },
+    {
+      "slideId": "variables_slide_5",
+      "type": "interactive",
+      "title": "تمرين تطبيقي",
+      "order": 5,
+      "content": {
+        "interactive": {
+          "type": "code_exercise",
+          "instruction": "أنشئ متغيرات لتخزين معلوماتك الشخصية واطبعها",
+          "template": "# أنشئ متغيرات لمعلوماتك الشخصية\nmy_name = \"\"  # اسمك\nmy_age = 0    # عمرك\nmy_height = 0.0  # طولك\nam_learning_python = True  # هل تتعلم Python؟\n\n# اطبع المعلومات\nprint(\"اسمي:\", my_name)\n# أكمل باقي الطباعة...",
+          "solution": "my_name = \"سارة\"\nmy_age = 22\nmy_height = 165.0\nam_learning_python = True\n\nprint(\"اسمي:\", my_name)\nprint(\"عمري:\", my_age)\nprint(\"طولي:\", my_height)\nprint(\"أتعلم Python:\", am_learning_python)",
+          "hints": [
+            "استخدم علامات التنصيص للنصوص",
+            "الأعداد الصحيحة بدون علامات تنصيص",
+            "الأعداد العشرية تحتوي على نقطة",
+            "القيم المنطقية هي True أو False"
+          ]
+        }
+      }
+    },
+    {
+      "slideId": "variables_slide_6",
+      "type": "explanation",
+      "title": "قواعد تسمية المتغيرات",
+      "order": 6,
+      "content": {
+        "text": "هناك قواعد مهمة يجب اتباعها عند تسمية المتغيرات في Python:",
+        "rules": [
+          {
+            "rule": "يجب أن يبدأ بحرف أو _",
+            "valid": "name, _age, user1",
+            "invalid": "1name, @user",
+            "status": "required"
+          },
+          {
+            "rule": "يمكن أن يحتوي على حروف وأرقام و _",
+            "valid": "user_name, age2, my_var",
+            "invalid": "user-name, my var",
+            "status": "required"
+          },
+          {
+            "rule": "حساس لحالة الأحرف",
+            "valid": "Name ≠ name ≠ NAME",
+            "invalid": "",
+            "status": "important"
+          },
+          {
+            "rule": "لا يمكن استخدام الكلمات المحجوزة",
+            "valid": "my_class, function_name",
+            "invalid": "class, def, if, for",
+            "status": "required"
+          }
+        ],
+        "bestPractices": [
+          "استخدم أسماء وصفية ومفهومة",
+          "استخدم snake_case للمتغيرات",
+          "تجنب الأسماء القصيرة جداً مثل x, y",
+          "استخدم الإنجليزية للأسماء في الكود"
+        ]
+      }
+    },
+    {
+      "slideId": "variables_slide_7",
+      "type": "summary",
+      "title": "ملخص الدرس",
+      "order": 7,
+      "content": {
+        "text": "ممتاز! لقد تعلمت أساسيات المتغيرات في Python. دعنا نراجع النقاط المهمة:",
+        "summary": [
+          "المتغيرات حاويات لتخزين البيانات",
+          "Python يحدد نوع البيانات تلقائياً",
+          "الأنواع الأساسية: str, int, float, bool",
+          "استخدم type() لمعرفة نوع المتغير",
+          "اتبع قواعد تسمية المتغيرات"
+        ],
+        "keyTakeaways": [
+          "لا حاجة لتعريف نوع البيانات مسبقاً",
+          "يمكن تغيير قيمة ونوع المتغير",
+          "استخدم أسماء وصفية للمتغيرات"
+        ],
+        "nextLesson": "في الدرس القادم سنتعلم العمليات الحسابية والمنطقية"
+      }
+    }
+  ],
+  "quizles": "variables_03_quiz",
+  "commonMistakes": [
+    {
+      "mistake": "استخدام أرقام في بداية اسم المتغير",
+      "correction": "ابدأ بحرف أو _",
+      "example": "❌ 1name → ✅ name1"
+    },
+    {
+      "mistake": "استخدام مسافات في أسماء المتغيرات",
+      "correction": "استخدم _ بدلاً من المسافة",
+      "example": "❌ my name → ✅ my_name"
+    }
+  ]
+}

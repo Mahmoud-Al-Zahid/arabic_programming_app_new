@@ -1,111 +1,309 @@
-class QuizQuestion {
+class Quiz {
   final String id;
-  final String question;
-  final List<String> options;
-  final int correctAnswer;
-  final String? explanation;
-  final String? code;
-  final String type; // multiple_choice, fill_blank, drag_drop
+  final String type;
+  final String title;
+  final int timeLimit;
+  final int passingScore;
+  final bool randomizeQuestions;
+  final String showResults;
+  final List<Question> questions;
+  final QuizFeedback feedback;
+  final LevelRequirements? levelRequirements;
 
-  const QuizQuestion({
+  const Quiz({
     required this.id,
-    required this.question,
-    required this.options,
-    required this.correctAnswer,
-    this.explanation,
-    this.code,
-    this.type = 'multiple_choice',
+    required this.type,
+    required this.title,
+    required this.timeLimit,
+    required this.passingScore,
+    required this.randomizeQuestions,
+    required this.showResults,
+    required this.questions,
+    required this.feedback,
+    this.levelRequirements,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'question': question,
-      'options': options,
-      'correctAnswer': correctAnswer,
-      'explanation': explanation,
-      'code': code,
-      'type': type,
-    };
-  }
-
-  factory QuizQuestion.fromJson(Map<String, dynamic> json) {
-    return QuizQuestion(
-      id: json['id'],
-      question: json['question'],
-      options: List<String>.from(json['options']),
-      correctAnswer: json['correctAnswer'],
-      explanation: json['explanation'],
-      code: json['code'],
-      type: json['type'] ?? 'multiple_choice',
+  factory Quiz.fromJson(Map<String, dynamic> json) {
+    return Quiz(
+      id: json['id'] ?? '',
+      type: json['type'] ?? '',
+      title: json['title'] ?? '',
+      timeLimit: json['timeLimit'] ?? 0,
+      passingScore: json['passingScore'] ?? 0,
+      randomizeQuestions: json['randomizeQuestions'] ?? false,
+      showResults: json['showResults'] ?? '',
+      questions: (json['questions'] as List<dynamic>?)
+          ?.map((question) => Question.fromJson(question))
+          .toList() ?? [],
+      feedback: QuizFeedback.fromJson(json['feedback'] ?? {}),
+      levelRequirements: json['levelRequirements'] != null 
+          ? LevelRequirements.fromJson(json['levelRequirements']) 
+          : null,
     );
   }
 }
 
-class Quiz {
-  final String id;
-  final String lessonId;
-  final String title;
-  final List<QuizQuestion> questions;
-  final int timeLimit; // in minutes
+class Question {
+  final String questionId;
+  final String questionType;
+  final String questionText;
+  final int points;
+  final String? codeSnippet;
+  final String? image;
+  final List<QuestionOption>? options;
+  final dynamic correctAnswer;
+  final String? explanation;
+  final List<String>? hints;
+  final List<String>? commonWrongAnswers;
+  final List<DragItem>? dragItems;
+  final List<DropZone>? dropZones;
+  final List<Blank>? blanks;
+  final String? expectedOutput;
+  final String? sampleSolution;
+  final String? template;
+  final String? error;
+  final String? correctCode;
+  final String? codeExample;
+  final List<LeftItem>? leftItems;
+  final List<RightItem>? rightItems;
+  final List<CorrectMatch>? correctMatches;
 
-  const Quiz({
-    required this.id,
-    required this.lessonId,
-    required this.title,
-    required this.questions,
-    this.timeLimit = 10,
+  const Question({
+    required this.questionId,
+    required this.questionType,
+    required this.questionText,
+    required this.points,
+    this.codeSnippet,
+    this.image,
+    this.options,
+    this.correctAnswer,
+    this.explanation,
+    this.hints,
+    this.commonWrongAnswers,
+    this.dragItems,
+    this.dropZones,
+    this.blanks,
+    this.expectedOutput,
+    this.sampleSolution,
+    this.template,
+    this.error,
+    this.correctCode,
+    this.codeExample,
+    this.leftItems,
+    this.rightItems,
+    this.correctMatches,
   });
 
-  // Legacy constructor for backward compatibility
-  const Quiz.legacy({
-    required this.id,
-    required this.lessonId,
-    required String question,
-    required List<String> options,
-    required int correctAnswer,
-  }) : title = 'Quiz',
-       questions = const [],
-       timeLimit = 10;
-
-  // Legacy getters for backward compatibility
-  String get question => questions.isNotEmpty ? questions.first.question : '';
-  List<String> get options => questions.isNotEmpty ? questions.first.options : [];
-  int get correctAnswer => questions.isNotEmpty ? questions.first.correctAnswer : 0;
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'lessonId': lessonId,
-      'title': title,
-      'questions': questions.map((q) => q.toJson()).toList(),
-      'timeLimit': timeLimit,
-    };
-  }
-
-  factory Quiz.fromJson(Map<String, dynamic> json) {
-    return Quiz(
-      id: json['id'],
-      lessonId: json['lessonId'],
-      title: json['title'] ?? 'Quiz',
-      questions: json['questions'] != null
-          ? (json['questions'] as List).map((q) => QuizQuestion.fromJson(q)).toList()
-          : [],
-      timeLimit: json['timeLimit'] ?? 10,
+  factory Question.fromJson(Map<String, dynamic> json) {
+    return Question(
+      questionId: json['questionId'] ?? '',
+      questionType: json['questionType'] ?? '',
+      questionText: json['questionText'] ?? '',
+      points: json['points'] ?? 0,
+      codeSnippet: json['codeSnippet'],
+      image: json['image'],
+      options: (json['options'] as List<dynamic>?)
+          ?.map((option) => QuestionOption.fromJson(option))
+          .toList(),
+      correctAnswer: json['correctAnswer'],
+      explanation: json['explanation'],
+      hints: (json['hints'] as List<dynamic>?)?.cast<String>(),
+      commonWrongAnswers: (json['commonWrongAnswers'] as List<dynamic>?)?.cast<String>(),
+      dragItems: (json['dragItems'] as List<dynamic>?)
+          ?.map((item) => DragItem.fromJson(item))
+          .toList(),
+      dropZones: (json['dropZones'] as List<dynamic>?)
+          ?.map((zone) => DropZone.fromJson(zone))
+          .toList(),
+      blanks: (json['blanks'] as List<dynamic>?)
+          ?.map((blank) => Blank.fromJson(blank))
+          .toList(),
+      expectedOutput: json['expectedOutput'],
+      sampleSolution: json['sampleSolution'],
+      template: json['template'],
+      error: json['error'],
+      correctCode: json['correctCode'],
+      codeExample: json['codeExample'],
+      leftItems: (json['leftItems'] as List<dynamic>?)
+          ?.map((item) => LeftItem.fromJson(item))
+          .toList(),
+      rightItems: (json['rightItems'] as List<dynamic>?)
+          ?.map((item) => RightItem.fromJson(item))
+          .toList(),
+      correctMatches: (json['correctMatches'] as List<dynamic>?)
+          ?.map((match) => CorrectMatch.fromJson(match))
+          .toList(),
     );
   }
+}
 
-  @override
-  String toString() {
-    return 'Quiz(id: $id, title: $title, questions: ${questions.length})';
+class QuestionOption {
+  final String optionId;
+  final String text;
+  final bool isCorrect;
+
+  const QuestionOption({
+    required this.optionId,
+    required this.text,
+    required this.isCorrect,
+  });
+
+  factory QuestionOption.fromJson(Map<String, dynamic> json) {
+    return QuestionOption(
+      optionId: json['optionId'] ?? '',
+      text: json['text'] ?? '',
+      isCorrect: json['isCorrect'] ?? false,
+    );
   }
+}
 
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Quiz && other.id == id;
+class DragItem {
+  final String id;
+  final String text;
+  final String correctZone;
+
+  const DragItem({
+    required this.id,
+    required this.text,
+    required this.correctZone,
+  });
+
+  factory DragItem.fromJson(Map<String, dynamic> json) {
+    return DragItem(
+      id: json['id'] ?? '',
+      text: json['text'] ?? '',
+      correctZone: json['correctZone'] ?? '',
+    );
   }
+}
 
-  @override
-  int get hashCode => id.hashCode;
+class DropZone {
+  final String id;
+  final String label;
+
+  const DropZone({
+    required this.id,
+    required this.label,
+  });
+
+  factory DropZone.fromJson(Map<String, dynamic> json) {
+    return DropZone(
+      id: json['id'] ?? '',
+      label: json['label'] ?? '',
+    );
+  }
+}
+
+class Blank {
+  final int position;
+  final String correctAnswer;
+  final String type;
+
+  const Blank({
+    required this.position,
+    required this.correctAnswer,
+    required this.type,
+  });
+
+  factory Blank.fromJson(Map<String, dynamic> json) {
+    return Blank(
+      position: json['position'] ?? 0,
+      correctAnswer: json['correctAnswer'] ?? '',
+      type: json['type'] ?? '',
+    );
+  }
+}
+
+class LeftItem {
+  final String id;
+  final String text;
+
+  const LeftItem({
+    required this.id,
+    required this.text,
+  });
+
+  factory LeftItem.fromJson(Map<String, dynamic> json) {
+    return LeftItem(
+      id: json['id'] ?? '',
+      text: json['text'] ?? '',
+    );
+  }
+}
+
+class RightItem {
+  final String id;
+  final String text;
+
+  const RightItem({
+    required this.id,
+    required this.text,
+  });
+
+  factory RightItem.fromJson(Map<String, dynamic> json) {
+    return RightItem(
+      id: json['id'] ?? '',
+      text: json['text'] ?? '',
+    );
+  }
+}
+
+class CorrectMatch {
+  final String left;
+  final String right;
+
+  const CorrectMatch({
+    required this.left,
+    required this.right,
+  });
+
+  factory CorrectMatch.fromJson(Map<String, dynamic> json) {
+    return CorrectMatch(
+      left: json['left'] ?? '',
+      right: json['right'] ?? '',
+    );
+  }
+}
+
+class QuizFeedback {
+  final List<String> excellent;
+  final List<String> good;
+  final List<String> average;
+  final List<String> needsImprovement;
+
+  const QuizFeedback({
+    required this.excellent,
+    required this.good,
+    required this.average,
+    required this.needsImprovement,
+  });
+
+  factory QuizFeedback.fromJson(Map<String, dynamic> json) {
+    return QuizFeedback(
+      excellent: (json['excellent'] as List<dynamic>?)?.cast<String>() ?? [],
+      good: (json['good'] as List<dynamic>?)?.cast<String>() ?? [],
+      average: (json['average'] as List<dynamic>?)?.cast<String>() ?? [],
+      needsImprovement: (json['needsImprovement'] as List<dynamic>?)?.cast<String>() ?? [],
+    );
+  }
+}
+
+class LevelRequirements {
+  final List<String> completedLessons;
+  final int minimumScore;
+  final bool unlockNextLevel;
+
+  const LevelRequirements({
+    required this.completedLessons,
+    required this.minimumScore,
+    required this.unlockNextLevel,
+  });
+
+  factory LevelRequirements.fromJson(Map<String, dynamic> json) {
+    return LevelRequirements(
+      completedLessons: (json['completedLessons'] as List<dynamic>?)?.cast<String>() ?? [],
+      minimumScore: json['minimumScore'] ?? 0,
+      unlockNextLevel: json['unlockNextLevel'] ?? false,
+    );
+  }
 }

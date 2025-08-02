@@ -1,0 +1,127 @@
+{
+  "lessonId": "intro_01",
+  "lessonTitle": "ما هو Python؟",
+  "lessonDescription": "مقدمة شاملة عن لغة Python وتاريخها واستخداماتها",
+  "estimatedMinutes": 15,
+  "slides": [
+    {
+      "slideId": "intro_slide_1",
+      "type": "introduction",
+      "title": "مرحباً بك في عالم Python! 🐍",
+      "order": 1,
+      "content": {
+        "text": "Python هي لغة برمجة قوية وسهلة التعلم، تم إنشاؤها بواسطة Guido van Rossum في عام 1991. تتميز بسهولة قراءتها وكتابتها، مما يجعلها الخيار الأمثل للمبتدئين والمحترفين على حد سواء.",
+        "image": "assets/images/slides/python_intro.png",
+        "highlights": ["سهلة التعلم والاستخدام", "مجتمع كبير ونشط", "مكتبات غنية ومتنوعة", "مفتوحة المصدر ومجانية"]
+      }
+    },
+    {
+      "slideId": "intro_slide_2",
+      "type": "explanation",
+      "title": "لماذا Python؟",
+      "order": 2,
+      "content": {
+        "text": "Python تستخدم في مجالات متعددة ومتنوعة، مما يجعلها واحدة من أكثر لغات البرمجة شعبية في العالم.",
+        "image": "assets/images/slides/python_uses.png",
+        "useCases": [
+          {
+            "title": "تطوير الويب",
+            "description": "باستخدام Django و Flask",
+            "icon": "🌐"
+          },
+          {
+            "title": "علم البيانات",
+            "description": "مع Pandas و NumPy",
+            "icon": "📊"
+          },
+          {
+            "title": "الذكاء الاصطناعي",
+            "description": "TensorFlow و PyTorch",
+            "icon": "🤖"
+          },
+          {
+            "title": "الأتمتة",
+            "description": "كتابة السكريبت والأتمتة",
+            "icon": "⚙️"
+          }
+        ]
+      }
+    },
+    {
+      "slideId": "intro_slide_3",
+      "type": "code_example",
+      "title": "أول برنامج Python",
+      "order": 3,
+      "content": {
+        "text": "دعنا نكتب أول برنامج Python! البرنامج التقليدي 'Hello, World!' بسيط جداً في Python.",
+        "codeSnippet": {
+          "code": "print(\"Hello, World!\")\nprint(\"مرحباً بالعالم!\")\nprint(\"أهلاً وسهلاً بك في Python\")",
+          "language": "python",
+          "explanation": "الدالة print() تستخدم لطباعة النص على الشاشة. يمكنك كتابة أي نص داخل علامات التنصيص.",
+          "output": "Hello, World!\nمرحباً بالعالم!\nأهلاً وسهلاً بك في Python",
+          "isExecutable": true
+        },
+        "notes": [
+          "لا حاجة لفاصلة منقوطة في نهاية السطر",
+          "Python يدعم النصوص العربية بشكل كامل",
+          "الدالة print() هي إحدى أهم الدوال الأساسية"
+        ]
+      }
+    },
+    {
+      "slideId": "intro_slide_4",
+      "type": "interactive",
+      "title": "جرب بنفسك!",
+      "order": 4,
+      "content": {
+        "interactive": {
+          "type": "code_exercise",
+          "instruction": "اكتب برنامج Python يطبع اسمك ورسالة ترحيب",
+          "template": "# اكتب الكود هنا\nprint(\"اسمي هو: \")\nprint(\"مرحباً بي في Python!\")",
+          "solution": "print(\"اسمي هو: أحمد\")\nprint(\"مرحباً بي في Python!\")",
+          "hints": [
+            "استخدم الدالة print() لطباعة النص",
+            "ضع النص داخل علامات التنصيص",
+            "يمكنك استخدام عدة أسطر print()"
+          ]
+        },
+        "text": "الآن حان دورك! جرب كتابة برنامج بسيط يطبع اسمك ورسالة ترحيب."
+      }
+    },
+    {
+      "slideId": "intro_slide_5",
+      "type": "summary",
+      "title": "ملخص الدرس",
+      "order": 5,
+      "content": {
+        "text": "تهانينا! لقد أكملت أول درس في Python. دعنا نراجع ما تعلمناه:",
+        "summary": [
+          "Python لغة برمجة سهلة وقوية",
+          "تستخدم في مجالات متعددة",
+          "الدالة print() لطباعة النصوص",
+          "لا حاجة لفاصلة منقوطة",
+          "تدعم اللغة العربية بشكل كامل"
+        ],
+        "nextSteps": [
+          "في الدرس القادم سنتعلم كيفية تثبيت Python",
+          "سنتعرف على بيئة التطوير",
+          "سنكتب برامج أكثر تعقيداً"
+        ],
+        "encouragement": "أحسنت! أنت في الطريق الصحيح لتعلم Python 🎉"
+      }
+    }
+  ],
+  "quizles": "intro_01_quiz",
+  "resources": [
+    {
+      "title": "الموقع الرسمي لـ Python",
+      "url": "https://www.python.org/",
+      "type": "documentation"
+    },
+    {
+      "title": "تاريخ Python",
+      "url": "https://en.wikipedia.org/wiki/Python_(programming_language)",
+      "type": "tutorial"
+    }
+  ]
+}
