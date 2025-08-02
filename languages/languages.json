@@ -1,0 +1,38 @@
+[
+  {
+    "id": "python",
+    "name": "Python",
+    "icon": "🐍",
+    "image": "assets/images/languages/python_bg.png",
+    "estimatedHours": "12 ساعة",
+    "description": "تعلم أساسيات البرمجة مع Python - اللغة الأسهل والأقوى",
+    "difficulty": "مبتدئ",
+    "color": "#3776ab",
+    "isPopular": true,
+    "features": ["سهلة التعلم", "مجتمع كبير", "مكتبات متنوعة", "وظائف كثيرة"]
+  },
+  {
+    "id": "javascript",
+    "name": "JavaScript",
+    "icon": "🌐",
+    "image": "assets/images/languages/javascript_bg.png",
+    "estimatedHours": "15 ساعة",
+    "description": "لغة الويب الأساسية - تطوير المواقع والتطبيقات",
+    "difficulty": "مبتدئ",
+    "color": "#f7df1e",
+    "isPopular": true,
+    "features": ["لغة الويب", "تطوير سريع", "مرونة عالية", "مجتمع نشط"]
+  },
+  {
+    "id": "java",
+    "name": "Java",
+    "icon": "☕",
+    "image": "assets/images/languages/java_bg.png",
+    "estimatedHours": "20 ساعة",
+    "description": "لغة قوية للتطبيقات الكبيرة والمؤسسية",
+    "difficulty": "متوسط",
+    "color": "#ed8b00",
+    "isPopular": false,
+    "features": ["أمان عالي", "أداء ممتاز", "متعددة المنصات", "مستقرة"]
+  }
+]

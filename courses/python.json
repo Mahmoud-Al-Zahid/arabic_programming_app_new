@@ -1,0 +1,101 @@
+{
+  "languageId": "python",
+  "languageName": "Python",
+  "helloLanguage": "%user%، مرحباً بك في عالم البايثون المذهل! 🐍✨",
+  "description": "ابدأ رحلتك في البرمجة مع Python - اللغة الأسهل والأقوى في العالم",
+  "totalLevels": 3,
+  "estimatedHours": 12,
+  "levels": [
+    {
+      "levelId": "python_basics",
+      "levelName": "أساسيات Python",
+      "levelDescription": "تعلم الأساسيات من الصفر",
+      "levelOrder": 1,
+      "estimatedHours": 4,
+      "lessons": [
+        {
+          "lessonId": "intro_01",
+          "lessonTitle": "ما هي Python؟",
+          "lessonOrder": 1,
+          "cardImage": "assets/images/lessons/python_intro_card.png",
+          "quizId": "intro_01_quiz",
+          "estimatedMinutes": 15,
+          "difficulty": "سهل"
+        },
+        {
+          "lessonId": "setup_02",
+          "lessonTitle": "إعداد البيئة البرمجية",
+          "lessonOrder": 2,
+          "cardImage": "assets/images/lessons/setup_card.png",
+          "quizId": "setup_02_quiz",
+          "estimatedMinutes": 20,
+          "difficulty": "سهل"
+        },
+        {
+          "lessonId": "variables_03",
+          "lessonTitle": "المتغيرات وأنواع البيانات",
+          "lessonOrder": 3,
+          "cardImage": "assets/images/lessons/variables_card.png",
+          "quizId": "variables_03_quiz",
+          "estimatedMinutes": 25,
+          "difficulty": "سهل"
+        }
+      ],
+      "quizlv": "python_basics_level_quiz.json"
+    },
+    {
+      "levelId": "python_intermediate",
+      "levelName": "Python المتوسط",
+      "levelDescription": "تعمق في مفاهيم البرمجة",
+      "levelOrder": 2,
+      "estimatedHours": 5,
+      "lessons": [
+        {
+          "lessonId": "functions_04",
+          "lessonTitle": "الدوال في Python",
+          "lessonOrder": 1,
+          "cardImage": "assets/images/lessons/functions_card.png",
+          "quizId": "functions_04_quiz",
+          "estimatedMinutes": 30,
+          "difficulty": "متوسط"
+        },
+        {
+          "lessonId": "loops_05",
+          "lessonTitle": "الحلقات والتكرار",
+          "lessonOrder": 2,
+          "cardImage": "assets/images/lessons/loops_card.png",
+          "quizId": "loops_05_quiz",
+          "estimatedMinutes": 35,
+          "difficulty": "متوسط"
+        }
+      ],
+      "quizlv": "python_intermediate_level_quiz.json"
+    },
+    {
+      "levelId": "python_advanced",
+      "levelName": "Python المتقدم",
+      "levelDescription": "مفاهيم متقدمة ومشاريع",
+      "levelOrder": 3,
+      "estimatedHours": 3,
+      "lessons": [
+        {
+          "lessonId": "oop_06",
+          "lessonTitle": "البرمجة الكائنية",
+          "lessonOrder": 1,
+          "cardImage": "assets/images/lessons/oop_card.png",
+          "quizId": "oop_06_quiz",
+          "estimatedMinutes": 40,
+          "difficulty": "صعب"
+        }
+      ],
+      "quizlv": "python_advanced_level_quiz.json"
+    }
+  ],
+  "finalExam": "python_final_exam.json",
+  "courseCertificate": "python_certificate.json",
+  "resources": {
+    "documentation": "https://docs.python.org/3/",
+    "community": "https://www.python.org/community/",
+    "tutorials": "https://realpython.com/"
+  }
+}

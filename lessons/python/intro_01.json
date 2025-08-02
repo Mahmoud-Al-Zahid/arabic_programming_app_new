@@ -1,0 +1,139 @@
+{
+  "lessonId": "intro_01",
+  "lessonTitle": "ما هي Python؟",
+  "lessonDescription": "تعرف على لغة Python وأهميتها في عالم البرمجة",
+  "estimatedMinutes": 15,
+  "slides": [
+    {
+      "slideId": "intro_slide_1",
+      "type": "introduction",
+      "title": "مرحباً بك في عالم Python! 🐍",
+      "order": 1,
+      "content": {
+        "text": "Python هي واحدة من أشهر لغات البرمجة في العالم. تم إنشاؤها بواسطة جويدو فان روسوم في عام 1991، وهي معروفة ببساطتها وقوتها في نفس الوقت.",
+        "image": "assets/images/slides/python_intro.png",
+        "highlights": [
+          "لغة سهلة التعلم والقراءة",
+          "تستخدم في مجالات متنوعة",
+          "مجتمع كبير ومساعد",
+          "مكتبات غنية ومتنوعة"
+        ]
+      }
+    },
+    {
+      "slideId": "intro_slide_2",
+      "type": "explanation",
+      "title": "لماذا Python مميزة؟",
+      "order": 2,
+      "content": {
+        "text": "Python تتميز بسهولة قراءتها وكتابتها، مما يجعلها مثالية للمبتدئين والخبراء على حد سواء.",
+        "useCases": [
+          {
+            "title": "تطوير الويب",
+            "description": "إنشاء مواقع ويب قوية باستخدام Django و Flask",
+            "icon": "🌐"
+          },
+          {
+            "title": "الذكاء الاصطناعي",
+            "description": "تطوير نماذج التعلم الآلي والذكاء الاصطناعي",
+            "icon": "🤖"
+          },
+          {
+            "title": "تحليل البيانات",
+            "description": "معالجة وتحليل البيانات الضخمة",
+            "icon": "📊"
+          },
+          {
+            "title": "الأتمتة",
+            "description": "أتمتة المهام اليومية والعمليات",
+            "icon": "⚙️"
+          }
+        ],
+        "image": "assets/images/slides/python_uses.png"
+      }
+    },
+    {
+      "slideId": "intro_slide_3",
+      "type": "code_example",
+      "title": "أول برنامج Python",
+      "order": 3,
+      "content": {
+        "text": "دعنا نكتب أول برنامج Python! هذا البرنامج البسيط سيطبع رسالة ترحيب.",
+        "codeSnippet": {
+          "code": "print(\"مرحباً بالعالم!\")\nprint(\"أهلاً بك في Python\")",
+          "language": "python",
+          "explanation": "الدالة print() تستخدم لطباعة النصوص على الشاشة. يمكنك كتابة أي نص داخل علامات التنصيص.",
+          "output": "مرحباً بالعالم!\nأهلاً بك في Python",
+          "isExecutable": true
+        },
+        "notes": [
+          "استخدم علامات التنصيص المزدوجة \" \" أو المفردة ' ' للنصوص",
+          "كل سطر في Python هو أمر منفصل",
+          "Python حساسة لحالة الأحرف (Case Sensitive)"
+        ]
+      }
+    },
+    {
+      "slideId": "intro_slide_4",
+      "type": "interactive",
+      "title": "جرب بنفسك!",
+      "order": 4,
+      "content": {
+        "text": "الآن حان دورك! اكتب برنامج يطبع اسمك ومدينتك.",
+        "interactive": {
+          "type": "code_exercise",
+          "instruction": "اكتب كود Python لطباعة اسمك في السطر الأول ومدينتك في السطر الثاني",
+          "template": "# اكتب الكود هنا\nprint(\"اسمي: ___\")\nprint(\"مدينتي: ___\")",
+          "solution": "print(\"اسمي: أحمد\")\nprint(\"مدينتي: الرياض\")",
+          "hints": ["استخدم الدالة print()", "ضع النص داخل علامات التنصيص", "اكتب كل print في سطر منفصل"]
+        }
+      }
+    },
+    {
+      "slideId": "intro_slide_5",
+      "type": "summary",
+      "title": "ملخص الدرس",
+      "order": 5,
+      "content": {
+        "summary": [
+          "Python لغة برمجة سهلة وقوية",
+          "تستخدم في مجالات متنوعة مثل الويب والذكاء الاصطناعي",
+          "الدالة print() تطبع النصوص على الشاشة",
+          "Python حساسة لحالة الأحرف"
+        ],
+        "keyTakeaways": [
+          "Python مثالية للمبتدئين",
+          "لها مجتمع كبير ومساعد",
+          "تستخدم في الشركات الكبرى مثل Google و Netflix"
+        ],
+        "nextLesson": "في الدرس القادم سنتعلم كيفية إعداد بيئة Python على جهازك",
+        "encouragement": "أحسنت! لقد أكملت أول درس في Python. استمر في التعلم وستصبح مبرمجاً محترفاً! 🎉"
+      }
+    }
+  ],
+  "quizles": "intro_01_quiz.json",
+  "resources": [
+    {
+      "title": "الموقع الرسمي لـ Python",
+      "url": "https://www.python.org/",
+      "type": "documentation"
+    },
+    {
+      "title": "دروس Python التفاعلية",
+      "url": "https://www.codecademy.com/learn/learn-python-3",
+      "type": "tutorial"
+    }
+  ],
+  "commonMistakes": [
+    {
+      "mistake": "نسيان علامات التنصيص حول النص",
+      "correction": "تأكد من وضع النص داخل \" \" أو ' '",
+      "example": "خطأ: print(مرحبا) ✗\nصحيح: print(\"مرحبا\") ✓"
+    },
+    {
+      "mistake": "كتابة Print بدلاً من print",
+      "correction": "Python حساسة لحالة الأحرف، استخدم print بأحرف صغيرة",
+      "example": "خطأ: Print(\"مرحبا\") ✗\nصحيح: print(\"مرحبا\") ✓"
+    }
+  ]
+}

@@ -1,0 +1,168 @@
+{
+  "id": "python_basics_level_quiz",
+  "type": "level",
+  "title": "اختبار المستوى: أساسيات Python",
+  "timeLimit": 30,
+  "passingScore": 75,
+  "randomizeQuestions": false,
+  "showResults": "after_completion",
+  "levelRequirements": {
+    "completedLessons": ["intro_01", "setup_02", "variables_03"],
+    "minimumScore": 75,
+    "unlockNextLevel": true
+  },
+  "questions": [
+    {
+      "questionId": "level_q1",
+      "questionType": "multiple_choice",
+      "questionText": "ما هي الطريقة الصحيحة لإنشاء متغير يحفظ اسمك في Python؟",
+      "points": 15,
+      "options": [
+        {
+          "optionId": "a",
+          "text": "my_name = \"أحمد\"",
+          "isCorrect": true
+        },
+        {
+          "optionId": "b",
+          "text": "string my_name = \"أحمد\"",
+          "isCorrect": false
+        },
+        {
+          "optionId": "c",
+          "text": "var my_name = \"أحمد\"",
+          "isCorrect": false
+        },
+        {
+          "optionId": "d",
+          "text": "my_name := \"أحمد\"",
+          "isCorrect": false
+        }
+      ],
+      "explanation": "في Python، لا نحتاج لتحديد نوع المتغير، فقط نكتب اسم المتغير = القيمة.",
+      "hints": ["Python لا تحتاج تحديد نوع المتغير", "استخدم علامة = للإسناد"]
+    },
+    {
+      "questionId": "level_q2",
+      "questionType": "code_completion",
+      "questionText": "أكمل الكود التالي لطباعة 'مرحباً' ثم اسم المستخدم:",
+      "points": 20,
+      "codeSnippet": "username = \"سارة\"\n_____(\"مرحباً\", _____)",
+      "correctAnswer": ["print", "username"],
+      "explanation": "نستخدم print() لطباعة النصوص والمتغيرات، ويمكن طباعة عدة عناصر بفصلها بفاصلة.",
+      "hints": ["استخدم دالة الطباعة", "اكتب اسم المتغير بدون علامات تنصيص"]
+    },
+    {
+      "questionId": "level_q3",
+      "questionType": "drag_drop",
+      "questionText": "رتب الخطوات التالية لإنشاء وطباعة متغير:",
+      "points": 15,
+      "dragItems": [
+        {
+          "id": "step1",
+          "text": "إنشاء المتغير",
+          "correctZone": "order1"
+        },
+        {
+          "id": "step2",
+          "text": "إسناد القيمة",
+          "correctZone": "order2"
+        },
+        {
+          "id": "step3",
+          "text": "طباعة المتغير",
+          "correctZone": "order3"
+        }
+      ],
+      "dropZones": [
+        {
+          "id": "order1",
+          "label": "الخطوة الأولى"
+        },
+        {
+          "id": "order2",
+          "label": "الخطوة الثانية"
+        },
+        {
+          "id": "order3",
+          "label": "الخطوة الثالثة"
+        }
+      ],
+      "explanation": "الترتيب الصحيح: إنشاء المتغير، إسناد القيمة، ثم طباعة المتغير.",
+      "hints": ["فكر في التسلسل المنطقي", "يجب إنشاء المتغير قبل استخدامه"]
+    },
+    {
+      "questionId": "level_q4",
+      "questionType": "true_false",
+      "questionText": "يمكن تغيير قيمة المتغير بعد إنشائه في Python.",
+      "points": 10,
+      "correctAnswer": true,
+      "explanation": "نعم، Python تسمح بتغيير قيم المتغيرات في أي وقت، وحتى تغيير نوع البيانات.",
+      "hints": ["فكر في مرونة Python", "هل المتغيرات ثابتة أم متغيرة؟"]
+    },
+    {
+      "questionId": "level_q5",
+      "questionType": "fill_blank",
+      "questionText": "أكمل الكود التالي لإنشاء متغيرات من أنواع مختلفة:",
+      "points": 25,
+      "codeSnippet": "name = ___\nage = ___\nheight = ___\nis_student = ___",
+      "blanks": [
+        {
+          "position": 1,
+          "correctAnswer": "\"أحمد\"",
+          "type": "string"
+        },
+        {
+          "position": 2,
+          "correctAnswer": "20",
+          "type": "number"
+        },
+        {
+          "position": 3,
+          "correctAnswer": "175.5",
+          "type": "float"
+        },
+        {
+          "position": 4,
+          "correctAnswer": "True",
+          "type": "boolean"
+        }
+      ],
+      "explanation": "كل نوع بيانات له شكل مختلف: النصوص بين علامات تنصيص، الأرقام بدون علامات، والقيم المنطقية True/False.",
+      "hints": ["النصوص تحتاج علامات تنصيص", "الأرقام العشرية تحتوي على نقطة", "القيم المنطقية هي True أو False"]
+    },
+    {
+      "questionId": "level_q6",
+      "questionType": "code_error_fix",
+      "questionText": "صحح الأخطاء في الكود التالي:",
+      "points": 15,
+      "codeSnippet": "2name = \"أحمد\"\nage = 25\nPrint(age)\nheight = \"175.5\"",
+      "error": "Multiple errors: invalid variable name, wrong function name, wrong data type",
+      "correctCode": "name2 = \"أحمد\"\nage = 25\nprint(age)\nheight = 175.5",
+      "explanation": "الأخطاء: اسم المتغير لا يمكن أن يبدأ برقم، print يجب أن تكون بأحرف صغيرة، والطول يجب أن يكون رقماً وليس نصاً.",
+      "hints": ["أسماء المتغيرات لا تبدأ بأرقام", "Python حساسة لحالة الأحرف", "الأرقام لا تحتاج علامات تنصيص"]
+    }
+  ],
+  "feedback": {
+    "excellent": [
+      "مبروك! لقد أتممت المستوى الأول بامتياز! 🎉",
+      "ممتاز! أنت مستعد للمستوى التالي! 🚀",
+      "أداء رائع! أساسيات Python أصبحت واضحة لك! ⭐"
+    ],
+    "good": [
+      "أداء جيد! راجع بعض النقاط وستكون مثالياً! 👍",
+      "جيد جداً! أنت تفهم الأساسيات جيداً! 📚",
+      "أحسنت! مع قليل من التحسين ستتقن المستوى! 💪"
+    ],
+    "average": [
+      "أداء مقبول، لكن تحتاج لمراجعة بعض المفاهيم 📖",
+      "راجع دروس المستوى مرة أخرى قبل المتابعة 🔄",
+      "تحتاج لمزيد من التمرين على الأساسيات 📝"
+    ],
+    "needsImprovement": [
+      "تحتاج لمراجعة شاملة لدروس المستوى 💪",
+      "لا تستسلم! راجع الدروس وأعد المحاولة 🔄",
+      "الأساسيات مهمة جداً، خذ وقتك في فهمها 📚"
+    ]
+  }
+}

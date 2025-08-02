@@ -1,0 +1,142 @@
+{
+  "id": "intro_01_quiz",
+  "type": "lesson",
+  "title": "اختبار: ما هي Python؟",
+  "timeLimit": 10,
+  "passingScore": 70,
+  "randomizeQuestions": true,
+  "showResults": "immediately",
+  "questions": [
+    {
+      "questionId": "q1_intro",
+      "questionType": "multiple_choice",
+      "questionText": "من هو مؤسس لغة Python؟",
+      "points": 10,
+      "options": [
+        {
+          "optionId": "a",
+          "text": "جويدو فان روسوم",
+          "isCorrect": true
+        },
+        {
+          "optionId": "b",
+          "text": "بيل جيتس",
+          "isCorrect": false
+        },
+        {
+          "optionId": "c",
+          "text": "مارك زوكربيرج",
+          "isCorrect": false
+        },
+        {
+          "optionId": "d",
+          "text": "ستيف جوبز",
+          "isCorrect": false
+        }
+      ],
+      "explanation": "جويدو فان روسوم هو المؤسس الحقيقي للغة Python، وقد أنشأها في عام 1991.",
+      "hints": ["فكر في الاسم الهولندي", "هو مبرمج هولندي مشهور"]
+    },
+    {
+      "questionId": "q2_intro",
+      "questionType": "multiple_choice",
+      "questionText": "في أي عام تم إنشاء لغة Python؟",
+      "points": 10,
+      "options": [
+        {
+          "optionId": "a",
+          "text": "1989",
+          "isCorrect": false
+        },
+        {
+          "optionId": "b",
+          "text": "1991",
+          "isCorrect": true
+        },
+        {
+          "optionId": "c",
+          "text": "1995",
+          "isCorrect": false
+        },
+        {
+          "optionId": "d",
+          "text": "2000",
+          "isCorrect": false
+        }
+      ],
+      "explanation": "تم إنشاء Python في عام 1991 بواسطة جويدو فان روسوم.",
+      "hints": ["في بداية التسعينات", "بعد عام 1990 بقليل"]
+    },
+    {
+      "questionId": "q3_intro",
+      "questionType": "code_completion",
+      "questionText": "ما هو الكود الصحيح لطباعة 'مرحباً بالعالم' في Python؟",
+      "points": 15,
+      "codeSnippet": "# اكتب الكود الصحيح\n_____(\"مرحباً بالعالم\")",
+      "correctAnswer": "print",
+      "explanation": "الدالة print() هي الطريقة الصحيحة لطباعة النصوص في Python.",
+      "hints": ["استخدم دالة الطباعة", "الدالة تبدأ بحرف p"]
+    },
+    {
+      "questionId": "q4_intro",
+      "questionType": "true_false",
+      "questionText": "Python لغة صعبة التعلم للمبتدئين.",
+      "points": 10,
+      "correctAnswer": false,
+      "explanation": "Python معروفة بأنها من أسهل لغات البرمجة تعلماً، خاصة للمبتدئين، بسبب بساطة قواعدها ووضوح كودها.",
+      "hints": ["فكر في سمعة Python", "ما رأيك في بساطة الكود؟"]
+    },
+    {
+      "questionId": "q5_intro",
+      "questionType": "multiple_choice",
+      "questionText": "أي من التالي ليس من استخدامات Python؟",
+      "points": 15,
+      "options": [
+        {
+          "optionId": "a",
+          "text": "تطوير الويب",
+          "isCorrect": false
+        },
+        {
+          "optionId": "b",
+          "text": "الذكاء الاصطناعي",
+          "isCorrect": false
+        },
+        {
+          "optionId": "c",
+          "text": "تحليل البيانات",
+          "isCorrect": false
+        },
+        {
+          "optionId": "d",
+          "text": "تصميم الدوائر الإلكترونية",
+          "isCorrect": true
+        }
+      ],
+      "explanation": "بينما Python تستخدم في العديد من المجالات، تصميم الدوائر الإلكترونية يتطلب أدوات متخصصة أخرى.",
+      "hints": ["فكر في المجالات البرمجية", "أي مجال ليس برمجياً بحتاً؟"]
+    }
+  ],
+  "feedback": {
+    "excellent": [
+      "ممتاز! لقد أتقنت أساسيات Python! 🌟",
+      "رائع جداً! أنت مستعد للمرحلة التالية! 🚀",
+      "أداء مثالي! استمر بهذا المستوى الرائع! 🎯"
+    ],
+    "good": [
+      "أداء جيد! مع قليل من المراجعة ستكون مثالياً! 👍",
+      "جيد جداً! راجع النقاط التي أخطأت فيها وستتحسن! 📚",
+      "أحسنت! أنت على الطريق الصحيح! 💪"
+    ],
+    "average": [
+      "أداء مقبول، لكن يمكنك تحسينه! راجع الدرس مرة أخرى 📖",
+      "تحتاج لمزيد من المراجعة. لا تستسلم! 🔄",
+      "أداء متوسط، راجع المفاهيم الأساسية مرة أخرى 📝"
+    ],
+    "needsImprovement": [
+      "تحتاج لمراجعة الدرس بعناية أكبر. لا تيأس! 💪",
+      "راجع الدرس مرة أخرى وحاول الاختبار لاحقاً 🔄",
+      "المراجعة مهمة للفهم الجيد. استمر في التعلم! 📚"
+    ]
+  }
+}

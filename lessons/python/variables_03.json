@@ -1,0 +1,195 @@
+{
+  "lessonId": "variables_03",
+  "lessonTitle": "المتغيرات وأنواع البيانات",
+  "lessonDescription": "تعلم كيفية استخدام المتغيرات وأنواع البيانات المختلفة في Python",
+  "estimatedMinutes": 25,
+  "slides": [
+    {
+      "slideId": "variables_slide_1",
+      "type": "introduction",
+      "title": "ما هي المتغيرات؟ 📦",
+      "order": 1,
+      "content": {
+        "text": "المتغيرات هي مثل الصناديق التي نحفظ فيها البيانات. يمكننا إعطاء كل صندوق اسماً ووضع قيمة بداخله.",
+        "image": "assets/images/slides/variables_concept.png",
+        "analogy": {
+          "title": "تشبيه المتغيرات بالصناديق",
+          "description": "تخيل المتغير كصندوق له اسم مكتوب عليه، ويمكنك وضع أشياء مختلفة بداخله مثل الأرقام أو النصوص."
+        }
+      }
+    },
+    {
+      "slideId": "variables_slide_2",
+      "type": "code_example",
+      "title": "إنشاء المتغيرات",
+      "order": 2,
+      "content": {
+        "text": "في Python، إنشاء المتغيرات سهل جداً! فقط اكتب اسم المتغير ثم علامة = ثم القيمة.",
+        "codeSnippet": {
+          "code": "# إنشاء متغيرات مختلفة\nname = \"أحمد\"\nage = 25\nheight = 175.5\nis_student = True\n\n# طباعة المتغيرات\nprint(name)\nprint(age)\nprint(height)\nprint(is_student)",
+          "language": "python",
+          "explanation": "هنا أنشأنا أربعة متغيرات مختلفة: اسم (نص)، عمر (رقم صحيح)، طول (رقم عشري)، وطالب (صح أو خطأ).",
+          "output": "أحمد\n25\n175.5\nTrue",
+          "isExecutable": true
+        },
+        "notes": [
+          "لا تحتاج لتحديد نوع المتغير في Python",
+          "أسماء المتغيرات يجب أن تبدأ بحرف أو _",
+          "تجنب استخدام الكلمات المحجوزة مثل print, if, for"
+        ]
+      }
+    },
+    {
+      "slideId": "variables_slide_3",
+      "type": "explanation",
+      "title": "أنواع البيانات في Python",
+      "order": 3,
+      "content": {
+        "text": "Python تدعم عدة أنواع من البيانات. كل نوع له استخدامات مختلفة:",
+        "dataTypes": [
+          {
+            "type": "str (النصوص)",
+            "description": "لحفظ الكلمات والجمل",
+            "example": "\"مرحبا\"، 'Python'",
+            "color": "#e74c3c"
+          },
+          {
+            "type": "int (الأرقام الصحيحة)",
+            "description": "للأرقام بدون فاصلة عشرية",
+            "example": "42، -10، 0",
+            "color": "#3498db"
+          },
+          {
+            "type": "float (الأرقام العشرية)",
+            "description": "للأرقام مع فاصلة عشرية",
+            "example": "3.14، -2.5، 0.0",
+            "color": "#2ecc71"
+          },
+          {
+            "type": "bool (صح أو خطأ)",
+            "description": "للقيم المنطقية",
+            "example": "True، False",
+            "color": "#f39c12"
+          }
+        ],
+        "image": "assets/images/slides/data_types.png"
+      }
+    },
+    {
+      "slideId": "variables_slide_4",
+      "type": "code_example",
+      "title": "قواعد تسمية المتغيرات",
+      "order": 4,
+      "content": {
+        "text": "هناك قواعد مهمة يجب اتباعها عند تسمية المتغيرات في Python:",
+        "rules": [
+          {
+            "rule": "يجب أن يبدأ بحرف أو _",
+            "valid": "name, _age, user1",
+            "invalid": "1name, @user, -age",
+            "status": "valid"
+          },
+          {
+            "rule": "يمكن أن يحتوي على أحرف وأرقام و _",
+            "valid": "user_name, age2, my_var",
+            "invalid": "user-name, age!, my var",
+            "status": "valid"
+          },
+          {
+            "rule": "حساس لحالة الأحرف",
+            "valid": "Name ≠ name ≠ NAME",
+            "invalid": "كلها متغيرات مختلفة",
+            "status": "info"
+          }
+        ],
+        "codeSnippet": {
+          "code": "# أسماء صحيحة\nuser_name = \"أحمد\"\nage_2023 = 25\n_private_var = \"سري\"\n\n# أسماء خاطئة (ستسبب خطأ)\n# 2age = 25  # خطأ: يبدأ برقم\n# user-name = \"أحمد\"  # خطأ: يحتوي على -\n# class = \"رياضيات\"  # خطأ: كلمة محجوزة",
+          "language": "python",
+          "explanation": "استخدم أسماء واضحة ومفهومة للمتغيرات. هذا يجعل الكود أسهل للقراءة والفهم.",
+          "output": "# الكود سيعمل بدون مشاكل",
+          "isExecutable": true
+        },
+        "bestPractices": [
+          "استخدم أسماء واضحة ومفهومة",
+          "استخدم snake_case للأسماء الطويلة",
+          "تجنب الأسماء المختصرة جداً مثل x, y إلا في الحلقات"
+        ]
+      }
+    },
+    {
+      "slideId": "variables_slide_5",
+      "type": "interactive",
+      "title": "تمرين: أنشئ متغيراتك!",
+      "order": 5,
+      "content": {
+        "text": "الآن حان دورك! أنشئ متغيرات لحفظ معلوماتك الشخصية.",
+        "interactive": {
+          "type": "code_exercise",
+          "instruction": "أنشئ متغيرات لحفظ: اسمك، عمرك، طولك، وما إذا كنت تحب البرمجة",
+          "template": "# أنشئ متغيراتك هنا\nmy_name = \"___\"\nmy_age = ___\nmy_height = ___\nloves_programming = ___\n\n# اطبع المتغيرات\nprint(\"الاسم:\", my_name)\nprint(\"العمر:\", my_age)\nprint(\"الطول:\", my_height)\nprint(\"يحب البرمجة:\", loves_programming)",
+          "solution": "my_name = \"سارة\"\nmy_age = 22\nmy_height = 165.0\nloves_programming = True\n\nprint(\"الاسم:\", my_name)\nprint(\"العمر:\", my_age)\nprint(\"الطول:\", my_height)\nprint(\"يحب البرمجة:\", loves_programming)",
+          "hints": [
+            "استخدم علامات التنصيص للنصوص",
+            "الأرقام لا تحتاج علامات تنصيص",
+            "استخدم True أو False للقيم المنطقية"
+          ]
+        }
+      }
+    },
+    {
+      "slideId": "variables_slide_6",
+      "type": "summary",
+      "title": "ملخص الدرس",
+      "order": 6,
+      "content": {
+        "summary": [
+          "المتغيرات تحفظ البيانات في الذاكرة",
+          "Python تدعم أنواع بيانات مختلفة: str, int, float, bool",
+          "أسماء المتغيرات لها قواعد محددة",
+          "استخدم أسماء واضحة ومفهومة"
+        ],
+        "keyTakeaways": [
+          "المتغيرات أساس أي برنامج",
+          "Python تحدد نوع البيانات تلقائياً",
+          "الأسماء الجيدة تجعل الكود أسهل للفهم"
+        ],
+        "nextSteps": [
+          "تعلم العمليات الحسابية على المتغيرات",
+          "تعلم كيفية تغيير قيم المتغيرات",
+          "تعلم دمج المتغيرات في النصوص"
+        ],
+        "encouragement": "ممتاز! الآن تعرف كيفية استخدام المتغيرات. هذا أساس مهم في البرمجة! 🎯"
+      }
+    }
+  ],
+  "quizles": "variables_03_quiz.json",
+  "resources": [
+    {
+      "title": "دليل المتغيرات في Python",
+      "url": "https://docs.python.org/3/tutorial/introduction.html",
+      "type": "documentation"
+    },
+    {
+      "title": "أنواع البيانات في Python",
+      "url": "https://realpython.com/python-data-types/",
+      "type": "tutorial"
+    }
+  ],
+  "commonMistakes": [
+    {
+      "mistake": "استخدام أسماء متغيرات تبدأ برقم",
+      "correction": "ابدأ دائماً بحرف أو _",
+      "example": "خطأ: 1name = \"أحمد\" ✗\nصحيح: name1 = \"أحمد\" ✓"
+    },
+    {
+      "mistake": "نسيان علامات التنصيص للنصوص",
+      "correction": "ضع النصوص داخل \" \" أو ' '",
+      "example": "خطأ: name = أحمد ✗\nصحيح: name = \"أحمد\" ✓"
+    },
+    {
+      "mistake": "خلط أنواع البيانات",
+      "correction": "تأكد من نوع البيانات المناسب",
+      "example": "خطأ: age = \"25\" (نص) ✗\nصحيح: age = 25 (رقم) ✓"
+    }
+  ]
+}

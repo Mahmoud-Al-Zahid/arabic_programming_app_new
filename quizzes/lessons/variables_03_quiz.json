@@ -1,0 +1,215 @@
+{
+  "id": "variables_03_quiz",
+  "type": "lesson",
+  "title": "اختبار: المتغيرات وأنواع البيانات",
+  "timeLimit": 15,
+  "passingScore": 70,
+  "randomizeQuestions": true,
+  "showResults": "immediately",
+  "questions": [
+    {
+      "questionId": "q1_variables",
+      "questionType": "multiple_choice",
+      "questionText": "أي من الأسماء التالية صحيح للمتغيرات في Python؟",
+      "points": 10,
+      "options": [
+        {
+          "optionId": "a",
+          "text": "user_name",
+          "isCorrect": true
+        },
+        {
+          "optionId": "b",
+          "text": "2user",
+          "isCorrect": false
+        },
+        {
+          "optionId": "c",
+          "text": "user-name",
+          "isCorrect": false
+        },
+        {
+          "optionId": "d",
+          "text": "user name",
+          "isCorrect": false
+        }
+      ],
+      "explanation": "user_name صحيح لأنه يبدأ بحرف ويستخدم _ بدلاً من المسافات أو الرموز الأخرى.",
+      "hints": ["يجب أن يبدأ بحرف أو _", "لا يمكن أن يحتوي على مسافات أو رموز خاصة"]
+    },
+    {
+      "questionId": "q2_variables",
+      "questionType": "drag_drop",
+      "questionText": "اسحب كل نوع بيانات إلى المثال المناسب:",
+      "points": 20,
+      "dragItems": [
+        {
+          "id": "str",
+          "text": "str (نص)",
+          "correctZone": "zone1"
+        },
+        {
+          "id": "int",
+          "text": "int (رقم صحيح)",
+          "correctZone": "zone2"
+        },
+        {
+          "id": "float",
+          "text": "float (رقم عشري)",
+          "correctZone": "zone3"
+        },
+        {
+          "id": "bool",
+          "text": "bool (منطقي)",
+          "correctZone": "zone4"
+        }
+      ],
+      "dropZones": [
+        {
+          "id": "zone1",
+          "label": "\"مرحباً\""
+        },
+        {
+          "id": "zone2",
+          "label": "42"
+        },
+        {
+          "id": "zone3",
+          "label": "3.14"
+        },
+        {
+          "id": "zone4",
+          "label": "True"
+        }
+      ],
+      "explanation": "كل نوع بيانات له شكل مميز: النصوص بين علامات تنصيص، الأرقام الصحيحة بدون فاصلة، العشرية مع فاصلة، والمنطقية True/False.",
+      "hints": [
+        "النصوص دائماً بين علامات تنصيص",
+        "الأرقام العشرية تحتوي على نقطة",
+        "القيم المنطقية هي True أو False فقط"
+      ]
+    },
+    {
+      "questionId": "q3_variables",
+      "questionType": "fill_blank",
+      "questionText": "أكمل الكود التالي لإنشاء متغير يحفظ عمرك:",
+      "points": 15,
+      "codeSnippet": "my_age = ___",
+      "blanks": [
+        {
+          "position": 1,
+          "correctAnswer": "25",
+          "type": "number"
+        }
+      ],
+      "explanation": "يجب وضع رقم (بدون علامات تنصيص) لأن العمر هو رقم صحيح.",
+      "hints": ["العمر هو رقم", "لا تستخدم علامات تنصيص للأرقام"]
+    },
+    {
+      "questionId": "q4_variables",
+      "questionType": "code_error_fix",
+      "questionText": "هناك خطأ في الكود التالي، ما هو الكود الصحيح؟",
+      "points": 15,
+      "codeSnippet": "Name = أحمد\nprint(Name)",
+      "error": "SyntaxError: invalid syntax",
+      "correctCode": "Name = \"أحمد\"\nprint(Name)",
+      "explanation": "النصوص يجب أن تكون داخل علامات تنصيص في Python.",
+      "hints": ["النصوص تحتاج علامات تنصيص", "استخدم \" \" أو ' ' حول النص"]
+    },
+    {
+      "questionId": "q5_variables",
+      "questionType": "matching",
+      "questionText": "اربط كل متغير بنوع البيانات المناسب:",
+      "points": 20,
+      "leftItems": [
+        {
+          "id": "var1",
+          "text": "name = \"سارة\""
+        },
+        {
+          "id": "var2",
+          "text": "age = 30"
+        },
+        {
+          "id": "var3",
+          "text": "height = 165.5"
+        },
+        {
+          "id": "var4",
+          "text": "is_married = False"
+        }
+      ],
+      "rightItems": [
+        {
+          "id": "type1",
+          "text": "str"
+        },
+        {
+          "id": "type2",
+          "text": "int"
+        },
+        {
+          "id": "type3",
+          "text": "float"
+        },
+        {
+          "id": "type4",
+          "text": "bool"
+        }
+      ],
+      "correctMatches": [
+        {
+          "left": "var1",
+          "right": "type1"
+        },
+        {
+          "left": "var2",
+          "right": "type2"
+        },
+        {
+          "left": "var3",
+          "right": "type3"
+        },
+        {
+          "left": "var4",
+          "right": "type4"
+        }
+      ],
+      "explanation": "كل متغير له نوع بيانات محدد: النصوص (str)، الأرقام الصحيحة (int)، العشرية (float)، والمنطقية (bool).",
+      "hints": ["انظر لشكل القيمة", "النصوص بين علامات تنصيص", "الأرقام العشرية تحتوي على نقطة"]
+    },
+    {
+      "questionId": "q6_variables",
+      "questionType": "code_completion",
+      "questionText": "أكمل الكود لطباعة قيمة المتغير مع نص توضيحي:",
+      "points": 10,
+      "template": "score = 95\nprint(\"النتيجة هي:\", _____)",
+      "expectedOutput": "النتيجة هي: 95",
+      "sampleSolution": "score = 95\nprint(\"النتيجة هي:\", score)",
+      "explanation": "يمكن طباعة المتغيرات مع النصوص باستخدام الفاصلة في print().",
+      "hints": ["استخدم اسم المتغير", "لا تضع المتغير بين علامات تنصيص"]
+    }
+  ],
+  "feedback": {
+    "excellent": [
+      "ممتاز! أتقنت المتغيرات وأنواع البيانات! 🎯",
+      "رائع! أنت مستعد لتعلم العمليات على المتغيرات! 🚀",
+      "أداء مثالي! المتغيرات أصبحت سهلة عليك! ⭐"
+    ],
+    "good": [
+      "أداء جيد! راجع أنواع البيانات مرة أخرى 👍",
+      "جيد جداً! مع قليل من التمرين ستتقن المتغيرات! 📚",
+      "أحسنت! أنت تفهم المفاهيم الأساسية جيداً! 💪"
+    ],
+    "average": [
+      "أداء مقبول، راجع قواعد تسمية المتغيرات 📖",
+      "تحتاج لمزيد من التمرين على أنواع البيانات 🔄",
+      "راجع الأمثلة في الدرس مرة أخرى 📝"
+    ],
+    "needsImprovement": [
+      "راجع الدرس بعناية، خاصة أنواع البيانات 💪",
+      "تمرن أكثر على إنشاء المتغيرات 🔄",
+      "لا تستسلم! المتغيرات أساس مهم في البرمجة 📚"
+    ]
+  }
+}
