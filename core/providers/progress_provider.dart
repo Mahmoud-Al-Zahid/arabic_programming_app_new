@@ -1,342 +1,140 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../data/repositories/progress_repository.dart';
 import '../domain/entities/user_entity.dart';
+import '../domain/usecases/get_user_progress_usecase.dart';
 import '../domain/usecases/complete_lesson_usecase.dart';
 import '../domain/usecases/complete_quiz_usecase.dart';
-import '../domain/usecases/get_user_progress_usecase.dart';
-import '../data/repositories/progress_repository.dart';
-import '../data/models/user_progress_model.dart';
-import '../services/cache_service.dart';
-import '../utils/progress_calculator.dart';
 
-final cacheServiceProvider = Provider<CacheService>((ref) => CacheService());
-
-final userProgressProvider = FutureProvider<UserProgressModel?>((ref) async {
-  final cacheService = ref.read(cacheServiceProvider);
-  return await cacheService.getUserProgress();
+// Progress Repository Provider
+final progressRepositoryProvider = Provider<ProgressRepository>((ref) {
+  return ProgressRepository();
 });
 
-final progressUpdateProvider = StateNotifierProvider<ProgressNotifier, UserProgressModel?>((ref) {
-  return ProgressNotifier(ref.read(cacheServiceProvider));
+// User Progress Use Case Provider
+final getUserProgressUseCaseProvider = Provider<GetUserProgressUseCase>((ref) {
+  final repository = ref.read(progressRepositoryProvider);
+  return GetUserProgressUseCase(repository);
 });
 
-class ProgressNotifier extends StateNotifier<UserProgressModel?> {
-  final CacheService _cacheService;
+// Complete Lesson Use Case Provider
+final completeLessonUseCaseProvider = Provider<CompleteLessonUseCase>((ref) {
+  final repository = ref.read(progressRepositoryProvider);
+  return CompleteLessonUseCase(repository);
+});
 
-  ProgressNotifier(this._cacheService) : super(null) {
-    _loadProgress();
-  }
+// Complete Quiz Use Case Provider
+final completeQuizUseCaseProvider = Provider<CompleteQuizUseCase>((ref) {
+  final repository = ref.read(progressRepositoryProvider);
+  return CompleteQuizUseCase(repository);
+});
 
-  Future<void> _loadProgress() async {
-    state = await _cacheService.getUserProgress();
-  }
+// Current User Provider
+final currentUserProvider = FutureProvider<UserEntity?>((ref) async {
+  final useCase = ref.read(getUserProgressUseCaseProvider);
+  return await useCase.execute();
+});
 
-  Future<void> updateProgress(UserProgressModel progress) async {
-    await _cacheService.saveUserProgress(progress);
-    state = progress;
-  }
+// User Progress Provider
+final userProgressProvider = FutureProvider.family<UserProgressEntity?, String>((ref, userId) async {
+  final useCase = ref.read(getUserProgressUseCaseProvider);
+  return await useCase.getUserProgress(userId);
+});
 
-  Future<void> completeLesson(String lessonId) async {
-    if (state != null) {
-      final updatedProgress = state!.copyWith(
-        currentLesson: lessonId,
-        completedLessons: [...(state!.completedLessons ?? []), lessonId],
-      );
-      await updateProgress(updatedProgress);
-    }
-  }
-}
+// Language Progress Provider
+final languageProgressProvider = FutureProvider.family<LanguageProgressEntity?, Map<String, String>>((ref, params) async {
+  final userId = params['userId']!;
+  final languageId = params['languageId']!;
+  
+  final useCase = ref.read(getUserProgressUseCaseProvider);
+  return await useCase.getLanguageProgress(userId: userId, languageId: languageId);
+});
 
-class ProgressProvider extends ChangeNotifier {
-  final CompleteLessonUseCase _completeLessonUseCase;
-  final CompleteQuizUseCase _completeQuizUseCase;
-  final GetUserProgressUseCase _getUserProgressUseCase;
-  final ProgressCalculator _progressCalculator;
-  final CacheService _cacheService;
+// User Stats Provider
+final userStatsProvider = FutureProvider.family<UserStatsEntity?, String>((ref, userId) async {
+  final useCase = ref.read(getUserProgressUseCaseProvider);
+  return await useCase.getUserStats(userId);
+});
 
-  // State
-  bool _isLoading = false;
-  String? _error;
-  UserEntity? _currentUser;
-  Map<String, double> _languageProgressCache = {};
+// Overall Progress Provider
+final overallProgressProvider = FutureProvider.family<double, String>((ref, userId) async {
+  final useCase = ref.read(getUserProgressUseCaseProvider);
+  return await useCase.getOverallProgress(userId);
+});
 
-  ProgressProvider({
-    required CacheService cacheService,
-  })  : _cacheService = cacheService,
-        _completeLessonUseCase = CompleteLessonUseCase(ProgressRepository()),
-        _completeQuizUseCase = CompleteQuizUseCase(ProgressRepository()),
-        _getUserProgressUseCase = GetUserProgressUseCase(ProgressRepository()),
-        _progressCalculator = ProgressCalculator() {
-    _loadUserProgress();
-  }
+// Level Progress Provider
+final levelProgressProvider = FutureProvider.family<Map<String, dynamic>, String>((ref, userId) async {
+  final useCase = ref.read(getUserProgressUseCaseProvider);
+  return await useCase.getLevelProgress(userId);
+});
 
-  // Getters
-  bool get isLoading => _isLoading;
-  String? get error => _error;
-  UserEntity? get currentUser => _currentUser;
-  bool get hasUser => _currentUser != null;
+// Progress Summary Provider
+final progressSummaryProvider = FutureProvider.family<Map<String, dynamic>, String>((ref, userId) async {
+  final useCase = ref.read(getUserProgressUseCaseProvider);
+  return await useCase.getProgressSummary(userId);
+});
 
-  // User stats getters
-  int get userLevel => _currentUser?.level ?? 1;
-  int get userXP => _currentUser?.xp ?? 0;
-  int get userCoins => _currentUser?.coins ?? 0;
-  int get userStreak => _currentUser?.streak ?? 0;
-  int get totalLessonsCompleted => _currentUser?.stats.totalLessonsCompleted ?? 0;
-  int get totalQuizzesPassed => _currentUser?.stats.totalQuizzesPassed ?? 0;
-  int get totalTimeSpent => _currentUser?.stats.totalTimeSpent ?? 0;
-  double get averageQuizScore => _currentUser?.stats.averageQuizScore ?? 0.0;
+// Recent Activity Provider
+final recentActivityProvider = FutureProvider.family<List<Map<String, dynamic>>, Map<String, dynamic>>((ref, params) async {
+  final userId = params['userId'] as String;
+  final limit = params['limit'] as int? ?? 10;
+  
+  final useCase = ref.read(getUserProgressUseCaseProvider);
+  return await useCase.getRecentActivity(userId, limit: limit);
+});
 
-  // Set loading state
-  void _setLoading(bool loading) {
-    _isLoading = loading;
-    notifyListeners();
-  }
+// Streak Info Provider
+final streakInfoProvider = FutureProvider.family<Map<String, dynamic>, String>((ref, userId) async {
+  final useCase = ref.read(getUserProgressUseCaseProvider);
+  return await useCase.getStreakInfo(userId);
+});
 
-  // Set error state
-  void _setError(String? error) {
-    _error = error;
-    notifyListeners();
-  }
+// Complete Lesson Provider
+final completeLessonProvider = FutureProvider.family<bool, Map<String, dynamic>>((ref, params) async {
+  final userId = params['userId'] as String;
+  final languageId = params['languageId'] as String;
+  final lessonId = params['lessonId'] as String;
+  final timeSpent = params['timeSpent'] as int;
+  final score = params['score'] as double?;
+  
+  final useCase = ref.read(completeLessonUseCaseProvider);
+  return await useCase.execute(
+    userId: userId,
+    languageId: languageId,
+    lessonId: lessonId,
+    timeSpent: timeSpent,
+    score: score,
+  );
+});
 
-  // Clear error
-  void clearError() {
-    _setError(null);
-  }
+// Complete Quiz Provider
+final completeQuizProvider = FutureProvider.family<bool, Map<String, dynamic>>((ref, params) async {
+  final userId = params['userId'] as String;
+  final languageId = params['languageId'] as String;
+  final quizId = params['quizId'] as String;
+  final quizResult = params['quizResult'] as QuizResultEntity;
+  
+  final useCase = ref.read(completeQuizUseCaseProvider);
+  return await useCase.execute(
+    userId: userId,
+    languageId: languageId,
+    quizId: quizId,
+    quizResult: quizResult,
+  );
+});
 
-  // Load user progress
-  Future<void> _loadUserProgress() async {
-    try {
-      _setLoading(true);
-      _setError(null);
+// Can Access Lesson Provider
+final canAccessLessonProvider = FutureProvider.family<bool, Map<String, dynamic>>((ref, params) async {
+  final userId = params['userId'] as String;
+  final languageId = params['languageId'] as String;
+  final lessonId = params['lessonId'] as String;
+  final lessonOrder = params['lessonOrder'] as int;
+  
+  final repository = ref.read(progressRepositoryProvider);
+  return await repository.canAccessLesson(userId, languageId, lessonId, lessonOrder);
+});
 
-      _currentUser = await _getUserProgressUseCase.execute();
-      _updateLanguageProgressCache();
-      
-      notifyListeners();
-    } catch (e) {
-      _setError('خطأ في تحميل تقدم المستخدم: $e');
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  // Update language progress cache
-  void _updateLanguageProgressCache() {
-    if (_currentUser == null) return;
-
-    _languageProgressCache.clear();
-    for (final entry in _currentUser!.progress.languages.entries) {
-      final languageId = entry.key;
-      final languageProgress = entry.value;
-      
-      final completedLessons = languageProgress.lessons.values
-          .where((lesson) => lesson.isCompleted)
-          .length;
-      
-      final totalLessons = languageProgress.lessons.length;
-      final progress = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0.0;
-      
-      _languageProgressCache[languageId] = progress;
-    }
-  }
-
-  // Complete lesson
-  Future<bool> completeLesson({
-    required String languageId,
-    required String lessonId,
-    required int timeSpent,
-    double? score,
-  }) async {
-    if (_currentUser == null) return false;
-
-    try {
-      _setLoading(true);
-      _setError(null);
-
-      final success = await _completeLessonUseCase.execute(
-        userId: _currentUser!.id,
-        languageId: languageId,
-        lessonId: lessonId,
-        timeSpent: timeSpent,
-        score: score,
-      );
-
-      if (success) {
-        // Reload user progress to get updated data
-        await _loadUserProgress();
-      }
-
-      return success;
-    } catch (e) {
-      _setError('خطأ في إكمال الدرس: $e');
-      return false;
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  // Complete quiz
-  Future<bool> completeQuiz({
-    required String languageId,
-    required String quizId,
-    required QuizResultEntity quizResult,
-  }) async {
-    if (_currentUser == null) return false;
-
-    try {
-      _setLoading(true);
-      _setError(null);
-
-      final success = await _completeQuizUseCase.execute(
-        userId: _currentUser!.id,
-        languageId: languageId,
-        quizId: quizId,
-        quizResult: quizResult,
-      );
-
-      if (success) {
-        // Reload user progress to get updated data
-        await _loadUserProgress();
-      }
-
-      return success;
-    } catch (e) {
-      _setError('خطأ في إكمال الاختبار: $e');
-      return false;
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  // Get language progress
-  double getLanguageProgress(String languageId) {
-    return _languageProgressCache[languageId] ?? 0.0;
-  }
-
-  // Get language progress entity
-  LanguageProgressEntity? getLanguageProgressEntity(String languageId) {
-    return _currentUser?.progress.languages[languageId];
-  }
-
-  // Check if lesson is completed
-  bool isLessonCompleted(String languageId, String lessonId) {
-    final languageProgress = getLanguageProgressEntity(languageId);
-    return languageProgress?.lessons[lessonId]?.isCompleted ?? false;
-  }
-
-  // Check if quiz is passed
-  bool isQuizPassed(String languageId, String quizId) {
-    final languageProgress = getLanguageProgressEntity(languageId);
-    return languageProgress?.quizResults[quizId]?.passed ?? false;
-  }
-
-  // Get lesson attempts
-  int getLessonAttempts(String languageId, String lessonId) {
-    final languageProgress = getLanguageProgressEntity(languageId);
-    return languageProgress?.lessons[lessonId]?.attempts ?? 0;
-  }
-
-  // Get lesson time spent
-  int getLessonTimeSpent(String languageId, String lessonId) {
-    final languageProgress = getLanguageProgressEntity(languageId);
-    return languageProgress?.lessons[lessonId]?.timeSpent ?? 0;
-  }
-
-  // Get quiz result
-  QuizResultEntity? getQuizResult(String languageId, String quizId) {
-    final languageProgress = getLanguageProgressEntity(languageId);
-    return languageProgress?.quizResults[quizId];
-  }
-
-  // Calculate XP for next level
-  int getXPForNextLevel() {
-    return _progressCalculator.calculateXPForNextLevel(userLevel);
-  }
-
-  // Calculate remaining XP for next level
-  int getRemainingXPForNextLevel() {
-    return _progressCalculator.calculateRemainingXPForNextLevel(userXP, userLevel);
-  }
-
-  // Calculate level progress percentage
-  double getLevelProgressPercentage() {
-    return _progressCalculator.calculateLevelProgress(userXP, userLevel);
-  }
-
-  // Get overall progress across all languages
-  double getOverallProgress() {
-    if (_languageProgressCache.isEmpty) return 0.0;
-
-    final totalProgress = _languageProgressCache.values.fold(0.0, (sum, progress) => sum + progress);
-    return totalProgress / _languageProgressCache.length;
-  }
-
-  // Get completed lessons count for language
-  int getCompletedLessonsCount(String languageId) {
-    final languageProgress = getLanguageProgressEntity(languageId);
-    if (languageProgress == null) return 0;
-
-    return languageProgress.lessons.values
-        .where((lesson) => lesson.isCompleted)
-        .length;
-  }
-
-  // Get passed quizzes count for language
-  int getPassedQuizzesCount(String languageId) {
-    final languageProgress = getLanguageProgressEntity(languageId);
-    if (languageProgress == null) return 0;
-
-    return languageProgress.quizResults.values
-        .where((quiz) => quiz.passed)
-        .length;
-  }
-
-  // Get language statistics
-  Map<String, dynamic> getLanguageStatistics(String languageId) {
-    final languageProgress = getLanguageProgressEntity(languageId);
-    if (languageProgress == null) {
-      return {
-        'progress': 0.0,
-        'completedLessons': 0,
-        'passedQuizzes': 0,
-        'timeSpent': 0,
-        'isCompleted': false,
-      };
-    }
-
-    final completedLessons = languageProgress.lessons.values
-        .where((lesson) => lesson.isCompleted)
-        .length;
-    
-    final passedQuizzes = languageProgress.quizResults.values
-        .where((quiz) => quiz.passed)
-        .length;
-    
-    final timeSpent = languageProgress.lessons.values
-        .fold(0, (sum, lesson) => sum + lesson.timeSpent) +
-        languageProgress.quizResults.values
-        .fold(0, (sum, quiz) => sum + quiz.timeSpent);
-
-    return {
-      'languageId': languageId,
-      'progress': getLanguageProgress(languageId),
-      'completedLessons': completedLessons,
-      'totalLessons': languageProgress.lessons.length,
-      'passedQuizzes': passedQuizzes,
-      'totalQuizzes': languageProgress.quizResults.length,
-      'timeSpent': timeSpent,
-      'isCompleted': languageProgress.isCompleted,
-      'lastAccessed': languageProgress.lastAccessed,
-    };
-  }
-
-  // Refresh progress data
-  Future<void> refreshProgress() async {
-    await _loadUserProgress();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-}
+// Export User Data Provider
+final exportUserDataProvider = FutureProvider.family<Map<String, dynamic>?, String>((ref, userId) async {
+  final useCase = ref.read(getUserProgressUseCaseProvider);
+  return await useCase.exportUserData(userId);
+});

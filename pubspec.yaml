@@ -24,16 +24,15 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  generate: true
   assets:
-    - assets/images/
-    - assets/images/avatars/
-    - assets/images/backgrounds/
-    - assets/images/tracks/
-    - assets/images/lessons/
-    - assets/images/languages/
-    - assets/images/slides/
-    - assets/languages/
-    - assets/courses/
-    - assets/lessons/
-    - assets/quizzes/
+    - images/
+    - images/avatars/
+    - images/backgrounds/
+    - images/tracks/
+    - images/lessons/
+    - images/languages/
+    - images/slides/
+    - languages/
+    - courses/
+    - lessons/
+    - quizzes/

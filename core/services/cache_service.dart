@@ -1,156 +1,103 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../data/models/user_progress_model.dart';
-import '../data/models/user_model.dart';
 
 class CacheService {
   static const String _userProgressKey = 'user_progress';
   static const String _userDataKey = 'user_data';
-  static const String _languagesKey = 'languages_cache';
-  static const String _coursesKey = 'courses_cache';
+  static const String _settingsKey = 'app_settings';
 
   // Save user progress
-  Future<void> saveUserProgress(UserProgressModel progress) async {
+  Future<void> saveUserProgress(Map<String, dynamic> progress) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final progressJson = json.encode(progress.toJson());
-      await prefs.setString(_userProgressKey, progressJson);
+      final jsonString = json.encode(progress);
+      await prefs.setString(_userProgressKey, jsonString);
     } catch (e) {
-      print('Error saving user progress: $e');
+      throw Exception('Failed to save user progress: $e');
     }
   }
 
   // Load user progress
-  Future<UserProgressModel?> getUserProgress() async {
+  Future<Map<String, dynamic>?> loadUserProgress() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final progressJson = prefs.getString(_userProgressKey);
-      
-      if (progressJson != null) {
-        final progressData = json.decode(progressJson);
-        return UserProgressModel.fromJson(progressData);
+      final jsonString = prefs.getString(_userProgressKey);
+      if (jsonString != null) {
+        return json.decode(jsonString) as Map<String, dynamic>;
       }
-      
-      return _getDefaultUserProgress();
+      return null;
     } catch (e) {
-      print('Error loading user progress: $e');
-      return _getDefaultUserProgress();
+      throw Exception('Failed to load user progress: $e');
     }
   }
 
   // Save user data
-  Future<void> saveUserData(UserModel user) async {
+  Future<void> saveUserData(Map<String, dynamic> userData) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final userJson = json.encode(user.toJson());
-      await prefs.setString(_userDataKey, userJson);
+      final jsonString = json.encode(userData);
+      await prefs.setString(_userDataKey, jsonString);
     } catch (e) {
-      print('Error saving user data: $e');
+      throw Exception('Failed to save user data: $e');
     }
   }
 
   // Load user data
-  Future<UserModel?> getUserData() async {
+  Future<Map<String, dynamic>?> loadUserData() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final userJson = prefs.getString(_userDataKey);
-      
-      if (userJson != null) {
-        final userData = json.decode(userJson);
-        return UserModel.fromJson(userData);
+      final jsonString = prefs.getString(_userDataKey);
+      if (jsonString != null) {
+        return json.decode(jsonString) as Map<String, dynamic>;
       }
-      
-      return _getDefaultUser();
-    } catch (e) {
-      print('Error loading user data: $e');
-      return _getDefaultUser();
-    }
-  }
-
-  // Cache data with key
-  Future<void> cacheData(String key, Map<String, dynamic> data) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final dataJson = json.encode(data);
-      await prefs.setString(key, dataJson);
-    } catch (e) {
-      print('Error caching data for key $key: $e');
-    }
-  }
-
-  // Get cached data
-  Future<Map<String, dynamic>?> getCachedData(String key) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final dataJson = prefs.getString(key);
-      
-      if (dataJson != null) {
-        return json.decode(dataJson);
-      }
-      
       return null;
     } catch (e) {
-      print('Error getting cached data for key $key: $e');
-      return null;
+      throw Exception('Failed to load user data: $e');
     }
   }
 
-  // Clear all cache
+  // Save app settings
+  Future<void> saveSettings(Map<String, dynamic> settings) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonString = json.encode(settings);
+      await prefs.setString(_settingsKey, jsonString);
+    } catch (e) {
+      throw Exception('Failed to save settings: $e');
+    }
+  }
+
+  // Load app settings
+  Future<Map<String, dynamic>?> loadSettings() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonString = prefs.getString(_settingsKey);
+      if (jsonString != null) {
+        return json.decode(jsonString) as Map<String, dynamic>;
+      }
+      return null;
+    } catch (e) {
+      throw Exception('Failed to load settings: $e');
+    }
+  }
+
+  // Clear all cached data
   Future<void> clearAllCache() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
     } catch (e) {
-      print('Error clearing cache: $e');
+      throw Exception('Failed to clear cache: $e');
     }
   }
 
-  // Clear specific cache
-  Future<void> clearCache(String key) async {
+  // Clear specific cache key
+  Future<void> clearCacheKey(String key) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(key);
     } catch (e) {
-      print('Error clearing cache for key $key: $e');
+      throw Exception('Failed to clear cache key $key: $e');
     }
-  }
-
-  // Check if data is cached
-  Future<bool> isCached(String key) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.containsKey(key);
-    } catch (e) {
-      print('Error checking cache for key $key: $e');
-      return false;
-    }
-  }
-
-  // Get default user progress
-  UserProgressModel _getDefaultUserProgress() {
-    return UserProgressModel(
-      currentLanguage: '',
-      currentCourse: '',
-      currentLesson: '',
-      completedCourses: [],
-      achievements: [],
-      streakDays: 0,
-      totalStudyTime: 0,
-    );
-  }
-
-  // Get default user
-  UserModel _getDefaultUser() {
-    return UserModel(
-      id: '1',
-      name: 'مستخدم جديد',
-      email: 'user@example.com',
-      avatarUrl: null,
-      level: 1,
-      xp: 0,
-      coins: 0,
-      completedLessons: [],
-      progress: _getDefaultUserProgress(),
-    );
   }
 }

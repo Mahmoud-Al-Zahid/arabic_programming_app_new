@@ -1,215 +1,111 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/models/lesson_model.dart';
-import '../data/models/slide_model.dart';
-import '../data/models/quiz_model.dart';
 import '../data/repositories/course_repository.dart';
+import '../data/models/lesson_model.dart';
+import '../data/models/quiz_model.dart';
 import '../services/json_service.dart';
-import 'app_provider.dart';
 
-final lessonByIdProvider = FutureProvider.family<LessonModel?, String>((ref, lessonId) async {
+// Lesson Repository Provider
+final lessonRepositoryProvider = Provider<CourseRepository>((ref) {
+  return CourseRepository();
+});
+
+// Lesson by ID Provider
+final lessonByIdProvider = FutureProvider.family<Lesson?, String>((ref, lessonId) async {
   final jsonService = ref.read(jsonServiceProvider);
   return await jsonService.loadLesson(lessonId);
 });
 
-final quizByIdProvider = FutureProvider.family<QuizModel?, String>((ref, quizId) async {
+// Quiz by ID Provider
+final quizByIdProvider = FutureProvider.family<Quiz?, String>((ref, quizId) async {
   final jsonService = ref.read(jsonServiceProvider);
   return await jsonService.loadQuiz(quizId);
 });
 
-final lessonProgressProvider = StateProvider.family<double, String>((ref, lessonId) => 0.0);
+// Lesson Quiz Provider
+final lessonQuizProvider = FutureProvider.family<Quiz?, String>((ref, lessonId) async {
+  final repository = ref.read(lessonRepositoryProvider);
+  return await repository.getLessonQuiz(lessonId);
+});
 
-class LessonProvider extends ChangeNotifier {
-  final CourseRepository _courseRepository;
+// Level Quiz Provider
+final levelQuizProvider = FutureProvider.family<Quiz?, String>((ref, levelId) async {
+  final repository = ref.read(lessonRepositoryProvider);
+  return await repository.getLevelQuiz(levelId);
+});
 
-  // State
-  bool _isLoading = false;
-  String? _error;
-  LessonModel? _currentLesson;
-  int _currentSlideIndex = 0;
-  bool _isLessonCompleted = false;
-  int _timeSpent = 0;
-  DateTime? _lessonStartTime;
+// Lesson Progress Provider
+final lessonProgressProvider = FutureProvider.family<Map<String, dynamic>, String>((ref, lessonId) async {
+  // This would typically get progress from user data
+  // For now, return mock progress
+  return {
+    'isCompleted': false,
+    'isUnlocked': true,
+    'timeSpent': 0,
+    'attempts': 0,
+    'score': null,
+  };
+});
 
-  LessonProvider() : _courseRepository = CourseRepository();
-
-  // Getters
-  bool get isLoading => _isLoading;
-  String? get error => _error;
-  LessonModel? get currentLesson => _currentLesson;
-  int get currentSlideIndex => _currentSlideIndex;
-  bool get isLessonCompleted => _isLessonCompleted;
-  int get timeSpent => _timeSpent;
-
-  bool get hasLesson => _currentLesson != null;
-  bool get hasNextSlide => _currentLesson != null && _currentSlideIndex < _currentLesson!.slides.length - 1;
-  bool get hasPreviousSlide => _currentSlideIndex > 0;
-  bool get isFirstSlide => _currentSlideIndex == 0;
-  bool get isLastSlide => _currentLesson != null && _currentSlideIndex == _currentLesson!.slides.length - 1;
-
-  Slide? get currentSlide => _currentLesson?.slides[_currentSlideIndex];
-  int get totalSlides => _currentLesson?.slides.length ?? 0;
-  double get progress => totalSlides > 0 ? (_currentSlideIndex + 1) / totalSlides : 0.0;
-
-  // Set loading state
-  void _setLoading(bool loading) {
-    _isLoading = loading;
-    notifyListeners();
+// Next Lesson Provider
+final nextLessonProvider = FutureProvider.family<Lesson?, Map<String, String>>((ref, params) async {
+  final courseId = params['courseId']!;
+  final currentLessonId = params['currentLessonId']!;
+  
+  final lessons = await ref.read(lessonsByCourseIdProvider(courseId).future);
+  final currentIndex = lessons.indexWhere((lesson) => lesson.lessonId == currentLessonId);
+  
+  if (currentIndex == -1 || currentIndex >= lessons.length - 1) {
+    return null;
   }
+  
+  return lessons[currentIndex + 1];
+});
 
-  // Set error state
-  void _setError(String? error) {
-    _error = error;
-    notifyListeners();
+// Previous Lesson Provider
+final previousLessonProvider = FutureProvider.family<Lesson?, Map<String, String>>((ref, params) async {
+  final courseId = params['courseId']!;
+  final currentLessonId = params['currentLessonId']!;
+  
+  final lessons = await ref.read(lessonsByCourseIdProvider(courseId).future);
+  final currentIndex = lessons.indexWhere((lesson) => lesson.lessonId == currentLessonId);
+  
+  if (currentIndex <= 0) {
+    return null;
   }
+  
+  return lessons[currentIndex - 1];
+});
 
-  // Clear error
-  void clearError() {
-    _setError(null);
-  }
+// Lesson Access Provider
+final lessonAccessProvider = FutureProvider.family<bool, Map<String, dynamic>>((ref, params) async {
+  final lessonId = params['lessonId'] as String;
+  final lessonOrder = params['lessonOrder'] as int;
+  
+  // First lesson is always accessible
+  if (lessonOrder == 1) return true;
+  
+  // This would typically check user progress
+  // For now, return true for all lessons
+  return true;
+});
 
-  // Load lesson
-  Future<void> loadLesson(String languageId, String lessonId) async {
-    try {
-      _setLoading(true);
-      _setError(null);
-
-      _currentLesson = await _courseRepository.getLesson(languageId, lessonId);
-      _currentSlideIndex = 0;
-      _isLessonCompleted = false;
-      _timeSpent = 0;
-      _lessonStartTime = DateTime.now();
-
-      notifyListeners();
-    } catch (e) {
-      _setError('خطأ في تحميل الدرس: $e');
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  // Go to next slide
-  void nextSlide() {
-    if (hasNextSlide) {
-      _currentSlideIndex++;
-      notifyListeners();
-    }
-  }
-
-  // Go to previous slide
-  void previousSlide() {
-    if (hasPreviousSlide) {
-      _currentSlideIndex--;
-      notifyListeners();
-    }
-  }
-
-  // Go to specific slide
-  void goToSlide(int index) {
-    if (_currentLesson != null && index >= 0 && index < _currentLesson!.slides.length) {
-      _currentSlideIndex = index;
-      notifyListeners();
-    }
-  }
-
-  // Complete lesson
-  void completeLesson() {
-    if (_currentLesson != null && !_isLessonCompleted) {
-      _isLessonCompleted = true;
-      _calculateTimeSpent();
-      notifyListeners();
-    }
-  }
-
-  // Calculate time spent
-  void _calculateTimeSpent() {
-    if (_lessonStartTime != null) {
-      final endTime = DateTime.now();
-      _timeSpent = endTime.difference(_lessonStartTime!).inSeconds;
-    }
-  }
-
-  // Get current time spent (live)
-  int getCurrentTimeSpent() {
-    if (_lessonStartTime != null) {
-      final currentTime = DateTime.now();
-      return currentTime.difference(_lessonStartTime!).inSeconds;
-    }
-    return 0;
-  }
-
-  // Reset lesson
-  void resetLesson() {
-    _currentSlideIndex = 0;
-    _isLessonCompleted = false;
-    _timeSpent = 0;
-    _lessonStartTime = DateTime.now();
-    notifyListeners();
-  }
-
-  // Get slide by ID
-  Slide? getSlideById(String slideId) {
-    if (_currentLesson == null) return null;
-
-    try {
-      return _currentLesson!.slides.firstWhere((slide) => slide.slideId == slideId);
-    } catch (e) {
-      return null;
-    }
-  }
-
-  // Get slides by type
-  List<Slide> getSlidesByType(String slideType) {
-    if (_currentLesson == null) return [];
-
-    return _currentLesson!.slides.where((slide) => slide.slideType == slideType).toList();
-  }
-
-  // Check if slide is interactive
-  bool isSlideInteractive(Slide slide) {
-    return slide.slideType == 'interactive' || 
-           slide.slideType == 'code' ||
-           slide.content.containsKey('interactive') ||
-           slide.content.containsKey('codeEditor');
-  }
-
-  // Get lesson statistics
-  Map<String, dynamic> getLessonStatistics() {
-    if (_currentLesson == null) {
-      return {
-        'totalSlides': 0,
-        'currentSlide': 0,
-        'progress': 0.0,
-        'timeSpent': 0,
-        'isCompleted': false,
-      };
-    }
-
+// Lesson Statistics Provider
+final lessonStatisticsProvider = FutureProvider.family<Map<String, dynamic>, String>((ref, lessonId) async {
+  final lesson = await ref.read(lessonByIdProvider(lessonId).future);
+  
+  if (lesson == null) {
     return {
-      'lessonId': _currentLesson!.lessonId,
-      'lessonTitle': _currentLesson!.lessonTitle,
-      'totalSlides': totalSlides,
-      'currentSlide': _currentSlideIndex + 1,
-      'progress': progress,
-      'timeSpent': getCurrentTimeSpent(),
-      'isCompleted': _isLessonCompleted,
-      'estimatedMinutes': _currentLesson!.estimatedMinutes,
+      'estimatedMinutes': 0,
+      'slidesCount': 0,
+      'hasQuiz': false,
+      'difficulty': 'مبتدئ',
     };
   }
-
-  // Clear current lesson
-  void clearLesson() {
-    _currentLesson = null;
-    _currentSlideIndex = 0;
-    _isLessonCompleted = false;
-    _timeSpent = 0;
-    _lessonStartTime = null;
-    notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    _calculateTimeSpent();
-    super.dispose();
-  }
-}
+  
+  return {
+    'estimatedMinutes': lesson.estimatedMinutes,
+    'slidesCount': lesson.slides.length,
+    'hasQuiz': lesson.quiz != null,
+    'difficulty': lesson.difficulty,
+  };
+});

@@ -14,6 +14,7 @@ class ValidationService {
 
   // Password validation
   static bool isValidPassword(String password) {
+    // At least 6 characters
     return password.length >= 6;
   }
 
@@ -235,14 +236,69 @@ class ValidationService {
   }
 
   // Validate lesson completion
-  static bool isLessonCompleted(int currentSlide, int totalSlides) {
-    return currentSlide >= totalSlides - 1;
+  static bool isLessonCompleted(Map<String, dynamic> progress, String lessonId) {
+    final completedLessons = progress['completedLessons'] as List<dynamic>? ?? [];
+    return completedLessons.contains(lessonId);
   }
 
   // Validate quiz score
-  static bool isQuizPassed(int score, int totalQuestions, {double passingPercentage = 0.7}) {
-    final percentage = score / totalQuestions;
-    return percentage >= passingPercentage;
+  static bool isQuizPassed(int score, int totalQuestions) {
+    final percentage = (score / totalQuestions) * 100;
+    return percentage >= 70; // 70% passing grade
+  }
+
+  // Validate lesson access
+  static bool canAccessLesson(Map<String, dynamic> progress, String lessonId, List<String> prerequisites) {
+    if (prerequisites.isEmpty) return true;
+    
+    final completedLessons = progress['completedLessons'] as List<dynamic>? ?? [];
+    return prerequisites.every((prereq) => completedLessons.contains(prereq));
+  }
+
+  // Validate JSON structure
+  static bool isValidJsonStructure(Map<String, dynamic> json, List<String> requiredKeys) {
+    return requiredKeys.every((key) => json.containsKey(key));
+  }
+
+  // Validate user level
+  static int calculateUserLevel(int xp) {
+    if (xp < 100) return 1;
+    if (xp < 300) return 2;
+    if (xp < 600) return 3;
+    if (xp < 1000) return 4;
+    if (xp < 1500) return 5;
+    return 6; // Max level
+  }
+
+  // Validate achievement unlock
+  static List<String> checkUnlockedAchievements(Map<String, dynamic> progress) {
+    final achievements = <String>[];
+    final completedLessons = progress['completedLessons'] as List<dynamic>? ?? [];
+    final xp = progress['xp'] as int? ?? 0;
+
+    // First lesson achievement
+    if (completedLessons.isNotEmpty) {
+      achievements.add('first_lesson');
+    }
+
+    // Complete 5 lessons
+    if (completedLessons.length >= 5) {
+      achievements.add('lesson_master');
+    }
+
+    // Reach level 3
+    if (calculateUserLevel(xp) >= 3) {
+      achievements.add('level_up');
+    }
+
+    return achievements;
+  }
+
+  // Username validation
+  static bool isValidUsername(String username) {
+    // At least 3 characters, alphanumeric and underscores only
+    final usernameRegex = RegExp(r'^[a-zA-Z0-9_]{3,}$');
+    return usernameRegex.hasMatch(username);
   }
 
   // Validate user input
@@ -264,12 +320,6 @@ class ValidationService {
     }
     
     return null;
-  }
-
-  // Validate lesson access
-  static bool canAccessLesson(int lessonOrder, List<String> completedLessons) {
-    if (lessonOrder == 1) return true;
-    return completedLessons.length >= lessonOrder - 1;
   }
 
   // Validate course completion
