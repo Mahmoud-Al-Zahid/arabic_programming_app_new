@@ -104,7 +104,7 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
 
             return CustomScrollView(
               slivers: [
-                // Animated Header - Python X Style
+                // Animated Header - Course Style
                 SliverToBoxAdapter(
                   child: AnimatedBuilder(
                     animation: _headerAnimation,
@@ -205,7 +205,7 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     child: Text(
-                      'مرحباً بك في عالم ${course.title}',
+                      'مرحباً بك في ${course.title}',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: Theme.of(context).colorScheme.onSurface,
@@ -314,7 +314,7 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
           Expanded(
             flex: 2,
             child: GestureDetector(
-              onTap: () => context.go('/lesson/${lesson.id}'),
+              onTap: () => context.go('/lesson/${lesson.lessonId}'),
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(

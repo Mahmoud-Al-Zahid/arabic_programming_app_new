@@ -72,7 +72,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          question.question,
+          question.questionText,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -154,11 +154,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       body: SafeArea(
         child: quizAsync.when(
           data: (quiz) {
-            if (quiz == null || quiz.questions == null || quiz.questions!.isEmpty) {
+            if (quiz == null || quiz.questions.isEmpty) {
               return const Center(child: Text('لا توجد أسئلة متاحة'));
             }
 
-            final questions = quiz.questions!;
+            final questions = quiz.questions;
             final currentQuestion = questions[_currentQuestion];
             final hasAnswer = _answers.containsKey(_currentQuestion);
             final isLastQuestion = _currentQuestion == questions.length - 1;

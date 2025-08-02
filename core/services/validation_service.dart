@@ -3,9 +3,7 @@ import 'dart:convert';
 class ValidationService {
   // Email validation
   static bool isValidEmail(String email) {
-    final RegExp emailRegex = RegExp(
-      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-    );
+    final RegExp emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     return emailRegex.hasMatch(email);
   }
 
@@ -229,5 +227,53 @@ class ValidationService {
     }
     
     return errors;
+  }
+
+  // Validate quiz answer
+  static bool isValidQuizAnswer(dynamic answer) {
+    return answer != null;
+  }
+
+  // Validate lesson completion
+  static bool isLessonCompleted(int currentSlide, int totalSlides) {
+    return currentSlide >= totalSlides - 1;
+  }
+
+  // Validate quiz score
+  static bool isQuizPassed(int score, int totalQuestions, {double passingPercentage = 0.7}) {
+    final percentage = score / totalQuestions;
+    return percentage >= passingPercentage;
+  }
+
+  // Validate user input
+  static String? validateUserInput(String? value, String fieldName) {
+    if (value == null || value.trim().isEmpty) {
+      return 'يرجى إدخال $fieldName';
+    }
+    
+    if (fieldName == 'البريد الإلكتروني' && !isValidEmail(value)) {
+      return 'يرجى إدخال بريد إلكتروني صحيح';
+    }
+    
+    if (fieldName == 'الاسم' && !isValidName(value)) {
+      return 'يجب أن يكون الاسم أكثر من حرفين';
+    }
+    
+    if (fieldName == 'كلمة المرور' && !isValidPassword(value)) {
+      return 'يجب أن تكون كلمة المرور 6 أحرف على الأقل';
+    }
+    
+    return null;
+  }
+
+  // Validate lesson access
+  static bool canAccessLesson(int lessonOrder, List<String> completedLessons) {
+    if (lessonOrder == 1) return true;
+    return completedLessons.length >= lessonOrder - 1;
+  }
+
+  // Validate course completion
+  static bool isCourseCompleted(List<String> completedLessons, int totalLessons) {
+    return completedLessons.length >= totalLessons;
   }
 }

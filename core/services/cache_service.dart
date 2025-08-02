@@ -6,130 +6,151 @@ import '../data/models/user_model.dart';
 class CacheService {
   static const String _userProgressKey = 'user_progress';
   static const String _userDataKey = 'user_data';
-  static const String _completedLessonsKey = 'completed_lessons';
-  static const String _userStatsKey = 'user_stats';
+  static const String _languagesKey = 'languages_cache';
+  static const String _coursesKey = 'courses_cache';
 
-  Future<UserProgressModel?> getUserProgress() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final String? progressJson = prefs.getString(_userProgressKey);
-      
-      if (progressJson != null) {
-        final Map<String, dynamic> data = json.decode(progressJson);
-        return UserProgressModel.fromJson(data);
-      }
-      
-      // Return default progress if none exists
-      return UserProgressModel(
-        currentLanguage: '',
-        currentCourse: '',
-        currentLesson: '',
-        completedCourses: [],
-        achievements: [],
-        streakDays: 0,
-        totalStudyTime: 0,
-      );
-    } catch (e) {
-      return null;
-    }
-  }
-
+  // Save user progress
   Future<void> saveUserProgress(UserProgressModel progress) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final String progressJson = json.encode(progress.toJson());
+      final progressJson = json.encode(progress.toJson());
       await prefs.setString(_userProgressKey, progressJson);
     } catch (e) {
-      throw Exception('Failed to save user progress: $e');
+      print('Error saving user progress: $e');
     }
   }
 
-  Future<UserModel?> getUserData() async {
+  // Load user progress
+  Future<UserProgressModel?> getUserProgress() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final String? userJson = prefs.getString(_userDataKey);
+      final progressJson = prefs.getString(_userProgressKey);
       
-      if (userJson != null) {
-        final Map<String, dynamic> data = json.decode(userJson);
-        return UserModel.fromJson(data);
+      if (progressJson != null) {
+        final progressData = json.decode(progressJson);
+        return UserProgressModel.fromJson(progressData);
       }
-      return null;
+      
+      return _getDefaultUserProgress();
     } catch (e) {
-      return null;
+      print('Error loading user progress: $e');
+      return _getDefaultUserProgress();
     }
   }
 
+  // Save user data
   Future<void> saveUserData(UserModel user) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final String userJson = json.encode(user.toJson());
+      final userJson = json.encode(user.toJson());
       await prefs.setString(_userDataKey, userJson);
     } catch (e) {
-      throw Exception('Failed to save user data: $e');
+      print('Error saving user data: $e');
     }
   }
 
-  Future<List<String>> getCompletedLessons() async {
+  // Load user data
+  Future<UserModel?> getUserData() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      return prefs.getStringList(_completedLessonsKey) ?? [];
-    } catch (e) {
-      return [];
-    }
-  }
-
-  Future<void> addCompletedLesson(String lessonId) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final List<String> completed = await getCompletedLessons();
+      final userJson = prefs.getString(_userDataKey);
       
-      if (!completed.contains(lessonId)) {
-        completed.add(lessonId);
-        await prefs.setStringList(_completedLessonsKey, completed);
-      }
-    } catch (e) {
-      throw Exception('Failed to add completed lesson: $e');
-    }
-  }
-
-  Future<Map<String, dynamic>> getUserStats() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final String? statsJson = prefs.getString(_userStatsKey);
-      
-      if (statsJson != null) {
-        return json.decode(statsJson);
+      if (userJson != null) {
+        final userData = json.decode(userJson);
+        return UserModel.fromJson(userData);
       }
       
-      // Return default stats
-      return {
-        'xp': 0,
-        'coins': 0,
-        'level': 1,
-        'streakDays': 0,
-        'totalStudyTime': 0,
-      };
+      return _getDefaultUser();
     } catch (e) {
-      return {};
+      print('Error loading user data: $e');
+      return _getDefaultUser();
     }
   }
 
-  Future<void> updateUserStats(Map<String, dynamic> stats) async {
+  // Cache data with key
+  Future<void> cacheData(String key, Map<String, dynamic> data) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final String statsJson = json.encode(stats);
-      await prefs.setString(_userStatsKey, statsJson);
+      final dataJson = json.encode(data);
+      await prefs.setString(key, dataJson);
     } catch (e) {
-      throw Exception('Failed to update user stats: $e');
+      print('Error caching data for key $key: $e');
     }
   }
 
-  Future<void> clearAllData() async {
+  // Get cached data
+  Future<Map<String, dynamic>?> getCachedData(String key) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final dataJson = prefs.getString(key);
+      
+      if (dataJson != null) {
+        return json.decode(dataJson);
+      }
+      
+      return null;
+    } catch (e) {
+      print('Error getting cached data for key $key: $e');
+      return null;
+    }
+  }
+
+  // Clear all cache
+  Future<void> clearAllCache() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
     } catch (e) {
-      throw Exception('Failed to clear data: $e');
+      print('Error clearing cache: $e');
     }
+  }
+
+  // Clear specific cache
+  Future<void> clearCache(String key) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(key);
+    } catch (e) {
+      print('Error clearing cache for key $key: $e');
+    }
+  }
+
+  // Check if data is cached
+  Future<bool> isCached(String key) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.containsKey(key);
+    } catch (e) {
+      print('Error checking cache for key $key: $e');
+      return false;
+    }
+  }
+
+  // Get default user progress
+  UserProgressModel _getDefaultUserProgress() {
+    return UserProgressModel(
+      currentLanguage: '',
+      currentCourse: '',
+      currentLesson: '',
+      completedCourses: [],
+      achievements: [],
+      streakDays: 0,
+      totalStudyTime: 0,
+    );
+  }
+
+  // Get default user
+  UserModel _getDefaultUser() {
+    return UserModel(
+      id: '1',
+      name: 'مستخدم جديد',
+      email: 'user@example.com',
+      avatarUrl: null,
+      level: 1,
+      xp: 0,
+      coins: 0,
+      completedLessons: [],
+      progress: _getDefaultUserProgress(),
+    );
   }
 }

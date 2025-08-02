@@ -84,11 +84,11 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
       body: SafeArea(
         child: lessonAsync.when(
           data: (lesson) {
-            if (lesson == null || lesson.slides == null || lesson.slides!.isEmpty) {
+            if (lesson == null || lesson.slides.isEmpty) {
               return const Center(child: Text('لا توجد شرائح متاحة'));
             }
 
-            final slides = lesson.slides!;
+            final slides = lesson.slides;
             final currentSlideData = slides[_currentSlide];
             final isLastSlide = _currentSlide == slides.length - 1;
 
