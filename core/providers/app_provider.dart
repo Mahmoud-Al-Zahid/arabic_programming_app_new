@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../domain/entities/user_entity.dart';
 import '../domain/entities/language_entity.dart';
 import '../domain/entities/course_entity.dart';
@@ -9,6 +10,9 @@ import '../domain/usecases/create_user_usecase.dart';
 import '../data/repositories/course_repository.dart';
 import '../data/repositories/progress_repository.dart';
 import '../services/cache_service.dart';
+import '../data/models/language_model.dart';
+import '../data/models/user_model.dart';
+import '../services/json_service.dart';
 
 class AppProvider extends ChangeNotifier {
   // Use cases
@@ -19,6 +23,7 @@ class AppProvider extends ChangeNotifier {
 
   // Services
   final CacheService _cacheService = CacheService();
+  final JsonService _jsonService = JsonService();
 
   // State
   bool _isLoading = false;
@@ -129,7 +134,11 @@ class AppProvider extends ChangeNotifier {
       _setLoading(true);
       _setError(null);
 
-      _languages = await _getLanguagesUseCase.execute();
+      if (forceRefresh) {
+        _languages = await _jsonService.loadLanguages();
+      } else {
+        _languages = await _getLanguagesUseCase.execute();
+      }
       notifyListeners();
     } catch (e) {
       _setError('خطأ في تحميل اللغات: $e');
@@ -292,3 +301,36 @@ class AppProvider extends ChangeNotifier {
     super.dispose();
   }
 }
+
+final jsonServiceProvider = Provider<JsonService>((ref) => JsonService());
+
+final languagesProvider = FutureProvider<List<LanguageModel>>((ref) async {
+  final jsonService = ref.read(jsonServiceProvider);
+  return await jsonService.loadLanguages();
+});
+
+final selectedLanguageProvider = StateProvider<String?>((ref) => null);
+
+final userProvider = FutureProvider<UserModel?>((ref) async {
+  // This would typically load from local storage or API
+  // For now, return a mock user
+  return UserModel(
+    id: '1',
+    name: 'أحمد محمد',
+    email: 'ahmed@example.com',
+    avatarUrl: 'assets/images/avatars/user_avatar.png',
+    level: 3,
+    xp: 1250,
+    coins: 500,
+    completedLessons: ['lesson_1', 'lesson_2', 'lesson_3'],
+    progress: UserProgressModel(
+      currentLanguage: 'python',
+      currentCourse: 'python_basics',
+      currentLesson: 'lesson_4',
+      completedCourses: [],
+      achievements: [],
+      streakDays: 7,
+      totalStudyTime: 120,
+    ),
+  );
+});

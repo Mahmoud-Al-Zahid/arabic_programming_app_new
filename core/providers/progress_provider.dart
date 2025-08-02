@@ -1,16 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../domain/entities/user_entity.dart';
 import '../domain/usecases/complete_lesson_usecase.dart';
 import '../domain/usecases/complete_quiz_usecase.dart';
 import '../domain/usecases/get_user_progress_usecase.dart';
 import '../data/repositories/progress_repository.dart';
+import '../data/models/user_progress_model.dart';
+import '../services/cache_service.dart';
 import '../utils/progress_calculator.dart';
+
+final cacheServiceProvider = Provider<CacheService>((ref) => CacheService());
+
+final userProgressProvider = FutureProvider<UserProgressModel?>((ref) async {
+  final cacheService = ref.read(cacheServiceProvider);
+  return await cacheService.getUserProgress();
+});
+
+final progressUpdateProvider = StateNotifierProvider<ProgressNotifier, UserProgressModel?>((ref) {
+  return ProgressNotifier(ref.read(cacheServiceProvider));
+});
+
+class ProgressNotifier extends StateNotifier<UserProgressModel?> {
+  final CacheService _cacheService;
+
+  ProgressNotifier(this._cacheService) : super(null) {
+    _loadProgress();
+  }
+
+  Future<void> _loadProgress() async {
+    state = await _cacheService.getUserProgress();
+  }
+
+  Future<void> updateProgress(UserProgressModel progress) async {
+    await _cacheService.saveUserProgress(progress);
+    state = progress;
+  }
+
+  Future<void> completeLesson(String lessonId) async {
+    if (state != null) {
+      final updatedProgress = state!.copyWith(
+        currentLesson: lessonId,
+        completedLessons: [...(state!.completedLessons ?? []), lessonId],
+      );
+      await updateProgress(updatedProgress);
+    }
+  }
+}
 
 class ProgressProvider extends ChangeNotifier {
   final CompleteLessonUseCase _completeLessonUseCase;
   final CompleteQuizUseCase _completeQuizUseCase;
   final GetUserProgressUseCase _getUserProgressUseCase;
   final ProgressCalculator _progressCalculator;
+  final CacheService _cacheService;
 
   // State
   bool _isLoading = false;
@@ -18,8 +60,10 @@ class ProgressProvider extends ChangeNotifier {
   UserEntity? _currentUser;
   Map<String, double> _languageProgressCache = {};
 
-  ProgressProvider()
-      : _completeLessonUseCase = CompleteLessonUseCase(ProgressRepository()),
+  ProgressProvider({
+    required CacheService cacheService,
+  })  : _cacheService = cacheService,
+        _completeLessonUseCase = CompleteLessonUseCase(ProgressRepository()),
         _completeQuizUseCase = CompleteQuizUseCase(ProgressRepository()),
         _getUserProgressUseCase = GetUserProgressUseCase(ProgressRepository()),
         _progressCalculator = ProgressCalculator() {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../domain/entities/course_entity.dart';
 import '../domain/entities/language_entity.dart';
 import '../domain/usecases/get_course_usecase.dart';
@@ -6,6 +7,24 @@ import '../domain/usecases/get_languages_usecase.dart';
 import '../data/repositories/course_repository.dart';
 import '../data/models/lesson_model.dart';
 import '../data/models/quiz_model.dart';
+import '../data/models/course_model.dart';
+import '../services/json_service.dart';
+import 'app_provider.dart';
+
+final courseByIdProvider = FutureProvider.family<CourseModel?, String>((ref, courseId) async {
+  final jsonService = ref.read(jsonServiceProvider);
+  return await jsonService.loadCourse(courseId);
+});
+
+final lessonsByCourseIdProvider = FutureProvider.family<List<LessonModel>, String>((ref, courseId) async {
+  final jsonService = ref.read(jsonServiceProvider);
+  return await jsonService.loadLessonsByCourse(courseId);
+});
+
+final coursesByLanguageProvider = FutureProvider.family<List<CourseModel>, String>((ref, languageId) async {
+  final jsonService = ref.read(jsonServiceProvider);
+  return await jsonService.loadCoursesByLanguage(languageId);
+});
 
 class CourseProvider extends ChangeNotifier {
   final GetCourseUseCase _getCourseUseCase;

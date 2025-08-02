@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/providers/data_providers.dart';
+import '../../../../core/providers/course_provider.dart';
 
 class CourseViewScreen extends ConsumerStatefulWidget {
   final String trackId;
@@ -91,14 +91,14 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
 
   @override
   Widget build(BuildContext context) {
-    final trackAsync = ref.watch(trackByIdProvider(widget.trackId));
-    final lessonsAsync = ref.watch(lessonsByTrackIdProvider(widget.trackId));
+    final courseAsync = ref.watch(courseByIdProvider(widget.trackId));
+    final lessonsAsync = ref.watch(lessonsByCourseIdProvider(widget.trackId));
 
     return Scaffold(
       body: SafeArea(
-        child: trackAsync.when(
-          data: (track) {
-            if (track == null) {
+        child: courseAsync.when(
+          data: (course) {
+            if (course == null) {
               return const Center(child: Text('المسار غير موجود'));
             }
 
@@ -147,7 +147,7 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
                                   ),
                                   const SizedBox(width: 16),
                                   
-                                  // Python Logo and Title
+                                  // Course Logo and Title
                                   Row(
                                     children: [
                                       Container(
@@ -165,7 +165,7 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
                                       ),
                                       const SizedBox(width: 12),
                                       Text(
-                                        'PYTHON X',
+                                        course.title.toUpperCase(),
                                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
@@ -205,7 +205,7 @@ class _CourseViewScreenState extends ConsumerState<CourseViewScreen>
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     child: Text(
-                      'John, Welcome to the world of Python',
+                      'مرحباً بك في عالم ${course.title}',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: Theme.of(context).colorScheme.onSurface,

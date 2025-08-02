@@ -1,205 +1,135 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../data/models/user_progress_model.dart';
+import '../data/models/user_model.dart';
 
 class CacheService {
-  static const String _cachePrefix = 'app_cache_';
-  static const String _cacheTimestampPrefix = 'cache_timestamp_';
-  static const int _defaultCacheExpiryHours = 24;
+  static const String _userProgressKey = 'user_progress';
+  static const String _userDataKey = 'user_data';
+  static const String _completedLessonsKey = 'completed_lessons';
+  static const String _userStatsKey = 'user_stats';
 
-  // Cache data with expiry
-  Future<void> cacheData(
-    String key,
-    dynamic data, {
-    int expiryHours = _defaultCacheExpiryHours,
-  }) async {
+  Future<UserProgressModel?> getUserProgress() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final cacheKey = _cachePrefix + key;
-      final timestampKey = _cacheTimestampPrefix + key;
+      final String? progressJson = prefs.getString(_userProgressKey);
       
-      final jsonData = jsonEncode(data);
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      
-      await prefs.setString(cacheKey, jsonData);
-      await prefs.setInt(timestampKey, timestamp);
-      
-      print('Cached data for key: $key');
-    } catch (e) {
-      print('Error caching data for key $key: $e');
-    }
-  }
-
-  // Get cached data
-  Future<T?> getCachedData<T>(
-    String key, {
-    int expiryHours = _defaultCacheExpiryHours,
-  }) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final cacheKey = _cachePrefix + key;
-      final timestampKey = _cacheTimestampPrefix + key;
-      
-      final cachedData = prefs.getString(cacheKey);
-      final timestamp = prefs.getInt(timestampKey);
-      
-      if (cachedData == null || timestamp == null) {
-        return null;
+      if (progressJson != null) {
+        final Map<String, dynamic> data = json.decode(progressJson);
+        return UserProgressModel.fromJson(data);
       }
       
-      // Check if cache has expired
-      final cacheTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
-      final expiryTime = cacheTime.add(Duration(hours: expiryHours));
-      
-      if (DateTime.now().isAfter(expiryTime)) {
-        // Cache expired, remove it
-        await removeCachedData(key);
-        return null;
-      }
-      
-      final decodedData = jsonDecode(cachedData);
-      return decodedData as T;
+      // Return default progress if none exists
+      return UserProgressModel(
+        currentLanguage: '',
+        currentCourse: '',
+        currentLesson: '',
+        completedCourses: [],
+        achievements: [],
+        streakDays: 0,
+        totalStudyTime: 0,
+      );
     } catch (e) {
-      print('Error getting cached data for key $key: $e');
       return null;
     }
   }
 
-  // Check if data is cached and valid
-  Future<bool> isCached(
-    String key, {
-    int expiryHours = _defaultCacheExpiryHours,
-  }) async {
+  Future<void> saveUserProgress(UserProgressModel progress) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final cacheKey = _cachePrefix + key;
-      final timestampKey = _cacheTimestampPrefix + key;
+      final String progressJson = json.encode(progress.toJson());
+      await prefs.setString(_userProgressKey, progressJson);
+    } catch (e) {
+      throw Exception('Failed to save user progress: $e');
+    }
+  }
+
+  Future<UserModel?> getUserData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? userJson = prefs.getString(_userDataKey);
       
-      final cachedData = prefs.getString(cacheKey);
-      final timestamp = prefs.getInt(timestampKey);
-      
-      if (cachedData == null || timestamp == null) {
-        return false;
+      if (userJson != null) {
+        final Map<String, dynamic> data = json.decode(userJson);
+        return UserModel.fromJson(data);
       }
-      
-      // Check if cache has expired
-      final cacheTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
-      final expiryTime = cacheTime.add(Duration(hours: expiryHours));
-      
-      return DateTime.now().isBefore(expiryTime);
+      return null;
     } catch (e) {
-      print('Error checking cache for key $key: $e');
-      return false;
+      return null;
     }
   }
 
-  // Remove cached data
-  Future<void> removeCachedData(String key) async {
+  Future<void> saveUserData(UserModel user) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final cacheKey = _cachePrefix + key;
-      final timestampKey = _cacheTimestampPrefix + key;
-      
-      await prefs.remove(cacheKey);
-      await prefs.remove(timestampKey);
-      
-      print('Removed cached data for key: $key');
+      final String userJson = json.encode(user.toJson());
+      await prefs.setString(_userDataKey, userJson);
     } catch (e) {
-      print('Error removing cached data for key $key: $e');
+      throw Exception('Failed to save user data: $e');
     }
   }
 
-  // Clear all cache
-  Future<void> clearAllCache() async {
+  Future<List<String>> getCompletedLessons() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final keys = prefs.getKeys();
-      
-      final cacheKeys = keys.where((key) => 
-        key.startsWith(_cachePrefix) || key.startsWith(_cacheTimestampPrefix)
-      ).toList();
-      
-      for (final key in cacheKeys) {
-        await prefs.remove(key);
-      }
-      
-      print('Cleared all cache data');
+      return prefs.getStringList(_completedLessonsKey) ?? [];
     } catch (e) {
-      print('Error clearing all cache: $e');
-    }
-  }
-
-  // Get cache size (approximate)
-  Future<int> getCacheSize() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final keys = prefs.getKeys();
-      
-      int totalSize = 0;
-      for (final key in keys) {
-        if (key.startsWith(_cachePrefix)) {
-          final data = prefs.getString(key);
-          if (data != null) {
-            totalSize += data.length;
-          }
-        }
-      }
-      
-      return totalSize;
-    } catch (e) {
-      print('Error calculating cache size: $e');
-      return 0;
-    }
-  }
-
-  // Get all cached keys
-  Future<List<String>> getCachedKeys() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final keys = prefs.getKeys();
-      
-      return keys
-          .where((key) => key.startsWith(_cachePrefix))
-          .map((key) => key.replaceFirst(_cachePrefix, ''))
-          .toList();
-    } catch (e) {
-      print('Error getting cached keys: $e');
       return [];
     }
   }
 
-  // Cache with custom serialization
-  Future<void> cacheObject<T>(
-    String key,
-    T object,
-    Map<String, dynamic> Function(T) toJson, {
-    int expiryHours = _defaultCacheExpiryHours,
-  }) async {
+  Future<void> addCompletedLesson(String lessonId) async {
     try {
-      final jsonData = toJson(object);
-      await cacheData(key, jsonData, expiryHours: expiryHours);
+      final prefs = await SharedPreferences.getInstance();
+      final List<String> completed = await getCompletedLessons();
+      
+      if (!completed.contains(lessonId)) {
+        completed.add(lessonId);
+        await prefs.setStringList(_completedLessonsKey, completed);
+      }
     } catch (e) {
-      print('Error caching object for key $key: $e');
+      throw Exception('Failed to add completed lesson: $e');
     }
   }
 
-  // Get cached object with custom deserialization
-  Future<T?> getCachedObject<T>(
-    String key,
-    T Function(Map<String, dynamic>) fromJson, {
-    int expiryHours = _defaultCacheExpiryHours,
-  }) async {
+  Future<Map<String, dynamic>> getUserStats() async {
     try {
-      final jsonData = await getCachedData<Map<String, dynamic>>(
-        key,
-        expiryHours: expiryHours,
-      );
+      final prefs = await SharedPreferences.getInstance();
+      final String? statsJson = prefs.getString(_userStatsKey);
       
-      if (jsonData == null) return null;
+      if (statsJson != null) {
+        return json.decode(statsJson);
+      }
       
-      return fromJson(jsonData);
+      // Return default stats
+      return {
+        'xp': 0,
+        'coins': 0,
+        'level': 1,
+        'streakDays': 0,
+        'totalStudyTime': 0,
+      };
     } catch (e) {
-      print('Error getting cached object for key $key: $e');
-      return null;
+      return {};
+    }
+  }
+
+  Future<void> updateUserStats(Map<String, dynamic> stats) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String statsJson = json.encode(stats);
+      await prefs.setString(_userStatsKey, statsJson);
+    } catch (e) {
+      throw Exception('Failed to update user stats: $e');
+    }
+  }
+
+  Future<void> clearAllData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+    } catch (e) {
+      throw Exception('Failed to clear data: $e');
     }
   }
 }

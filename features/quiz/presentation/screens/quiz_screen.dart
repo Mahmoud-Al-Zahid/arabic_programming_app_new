@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../../core/providers/data_providers.dart';
-import '../../../../core/data/repositories/python_repository.dart';
+import '../../../../core/providers/lesson_provider.dart';
 
 class QuizScreen extends ConsumerStatefulWidget {
   final String quizId;
@@ -17,16 +16,6 @@ class QuizScreen extends ConsumerStatefulWidget {
 class _QuizScreenState extends ConsumerState<QuizScreen> {
   int _currentQuestion = 0;
   final Map<int, dynamic> _answers = {};
-  late List<dynamic> _questions;
-  late String _quizTitle;
-
-  @override
-  void initState() {
-    super.initState();
-    final quiz = PythonRepository.sampleQuiz;
-    _questions = [quiz];
-    _quizTitle = 'اختبار Python';
-  }
 
   void _selectAnswer(dynamic answer) {
     setState(() {
@@ -34,13 +23,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     });
   }
 
-  void _nextQuestion() {
-    if (_currentQuestion < _questions.length - 1) {
+  void _nextQuestion(List<dynamic> questions) {
+    if (_currentQuestion < questions.length - 1) {
       setState(() {
         _currentQuestion++;
       });
     } else {
-      _finishQuiz();
+      _finishQuiz(questions);
     }
   }
 
@@ -52,11 +41,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     }
   }
 
-  void _finishQuiz() {
+  void _finishQuiz(List<dynamic> questions) {
     // Calculate score
     int correctAnswers = 0;
-    for (int i = 0; i < _questions.length; i++) {
-      final question = _questions[i];
+    for (int i = 0; i < questions.length; i++) {
+      final question = questions[i];
       final userAnswer = _answers[i];
       
       if (userAnswer == question.correctAnswer) {
@@ -66,10 +55,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
     final results = {
       'score': correctAnswers,
-      'total': _questions.length,
-      'percentage': (correctAnswers / _questions.length * 100).round(),
+      'total': questions.length,
+      'percentage': (correctAnswers / questions.length * 100).round(),
       'answers': _answers,
-      'questions': _questions,
+      'questions': questions,
     };
 
     context.pushReplacement('/results', extra: results);
@@ -156,109 +145,124 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentQuestion = _questions[_currentQuestion];
-    final hasAnswer = _answers.containsKey(_currentQuestion);
-    final isLastQuestion = _currentQuestion == _questions.length - 1;
+    final quizAsync = ref.watch(quizByIdProvider(widget.quizId));
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_quizTitle),
+        title: const Text('الاختبار'),
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            // Progress Header
-            Container(
-              padding: const EdgeInsets.all(AppConstants.defaultPadding),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: quizAsync.when(
+          data: (quiz) {
+            if (quiz == null || quiz.questions == null || quiz.questions!.isEmpty) {
+              return const Center(child: Text('لا توجد أسئلة متاحة'));
+            }
+
+            final questions = quiz.questions!;
+            final currentQuestion = questions[_currentQuestion];
+            final hasAnswer = _answers.containsKey(_currentQuestion);
+            final isLastQuestion = _currentQuestion == questions.length - 1;
+
+            return Column(
+              children: [
+                // Progress Header
+                Container(
+                  padding: const EdgeInsets.all(AppConstants.defaultPadding),
+                  child: Column(
                     children: [
-                      Text(
-                        'السؤال ${_currentQuestion + 1} من ${_questions.length}',
-                        style: Theme.of(context).textTheme.bodyMedium,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'السؤال ${_currentQuestion + 1} من ${questions.length}',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.timer,
+                                  size: 16,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '05:00',
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.timer,
-                              size: 16,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '05:00',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+                      const SizedBox(height: 8),
+                      LinearProgressIndicator(
+                        value: (_currentQuestion + 1) / questions.length,
+                        backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Theme.of(context).colorScheme.primary,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  LinearProgressIndicator(
-                    value: (_currentQuestion + 1) / _questions.length,
-                    backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                ),
 
-            // Question Content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppConstants.defaultPadding),
-                child: _buildMultipleChoiceQuestion(currentQuestion),
-              ),
-            ),
-
-            // Navigation Buttons
-            Container(
-              padding: const EdgeInsets.all(AppConstants.defaultPadding),
-              child: Row(
-                children: [
-                  // Previous Button
-                  if (_currentQuestion > 0)
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: _previousQuestion,
-                        child: const Text('السابق'),
-                      ),
-                    ),
-                  if (_currentQuestion > 0) const SizedBox(width: 16),
-                  // Next/Finish Button
-                  Expanded(
-                    flex: _currentQuestion == 0 ? 1 : 1,
-                    child: ElevatedButton(
-                      onPressed: hasAnswer ? (isLastQuestion ? _finishQuiz : _nextQuestion) : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: Text(
-                        isLastQuestion ? 'إنهاء الاختبار' : 'التالي',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
+                // Question Content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(AppConstants.defaultPadding),
+                    child: _buildMultipleChoiceQuestion(currentQuestion),
                   ),
-                ],
-              ),
-            ),
-          ],
+                ),
+
+                // Navigation Buttons
+                Container(
+                  padding: const EdgeInsets.all(AppConstants.defaultPadding),
+                  child: Row(
+                    children: [
+                      // Previous Button
+                      if (_currentQuestion > 0)
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: _previousQuestion,
+                            child: const Text('السابق'),
+                          ),
+                        ),
+                      if (_currentQuestion > 0) const SizedBox(width: 16),
+                      // Next/Finish Button
+                      Expanded(
+                        flex: _currentQuestion == 0 ? 1 : 1,
+                        child: ElevatedButton(
+                          onPressed: hasAnswer ? (isLastQuestion ? () => _finishQuiz(questions) : () => _nextQuestion(questions)) : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: Text(
+                            isLastQuestion ? 'إنهاء الاختبار' : 'التالي',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(
+            child: Text('حدث خطأ في تحميل الاختبار: $error'),
+          ),
         ),
       ),
     );

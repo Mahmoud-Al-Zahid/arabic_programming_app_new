@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/providers/theme_provider.dart';
-import '../../../../core/providers/data_providers.dart';
+import '../../../../core/providers/app_provider.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -57,7 +57,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
   @override
   Widget build(BuildContext context) {
-    final userAsync = ref.watch(currentUserProvider);
+    final userAsync = ref.watch(userProvider);
     final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
@@ -164,10 +164,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           CircleAvatar(
             radius: 50,
             backgroundColor: Colors.white.withOpacity(0.2),
-            backgroundImage: user.avatarUrl != null 
-                ? AssetImage(user.avatarUrl!)
+            backgroundImage: user?.avatarUrl != null 
+                ? AssetImage(user!.avatarUrl!)
                 : null,
-            child: user.avatarUrl == null
+            child: user?.avatarUrl == null
                 ? const Icon(
                     Icons.person,
                     size: 50,
@@ -179,7 +179,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
           // User Info
           Text(
-            user.name,
+            user?.name ?? 'مستخدم',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -187,7 +187,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            user.email,
+            user?.email ?? 'user@example.com',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Colors.white.withOpacity(0.9),
             ),
@@ -202,7 +202,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              'المستوى ${user.level}',
+              'المستوى ${user?.level ?? 1}',
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -220,7 +220,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         Expanded(
           child: _buildStatCard(
             'نقاط الخبرة',
-            '${user.xp}',
+            '${user?.xp ?? 0}',
             Icons.star,
             const Color(0xFFF39C12),
           ),
@@ -229,7 +229,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         Expanded(
           child: _buildStatCard(
             'العملات',
-            '${user.coins}',
+            '${user?.coins ?? 0}',
             Icons.monetization_on,
             const Color(0xFF2ECC71),
           ),
@@ -325,9 +325,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   }
 
   Widget _buildProgressSection(user) {
-    final completedLessons = user.completedLessons.length;
-    final totalLessons = 12; // This would come from your data service
-    final progressPercentage = (completedLessons / totalLessons * 100).round();
+    final completedLessons = user?.completedLessons?.length ?? 0;
+    const totalLessons = 12; // This would come from your data service
+    final progressPercentage = totalLessons > 0 ? (completedLessons / totalLessons * 100).round() : 0;
 
     return Container(
       padding: const EdgeInsets.all(AppConstants.defaultPadding),
@@ -373,7 +373,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     ),
                     const SizedBox(height: 8),
                     LinearProgressIndicator(
-                      value: completedLessons / totalLessons,
+                      value: totalLessons > 0 ? completedLessons / totalLessons : 0,
                       backgroundColor: Theme.of(context).colorScheme.outline.withOpacity(0.3),
                       valueColor: AlwaysStoppedAnimation<Color>(
                         Theme.of(context).colorScheme.primary,

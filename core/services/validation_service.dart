@@ -1,38 +1,22 @@
+import 'dart:convert';
+
 class ValidationService {
   // Email validation
   static bool isValidEmail(String email) {
-    if (email.isEmpty) return false;
-    
-    final emailRegex = RegExp(
-      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    final RegExp emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
     );
-    
-    return emailRegex.hasMatch(email.trim());
+    return emailRegex.hasMatch(email);
   }
 
   // Name validation
   static bool isValidName(String name) {
-    if (name.isEmpty) return false;
-    
-    final trimmedName = name.trim();
-    if (trimmedName.length < 2 || trimmedName.length > 50) return false;
-    
-    // Check for valid characters (letters, spaces, hyphens, apostrophes)
-    final nameRegex = RegExp(r"^[a-zA-Z\u0600-\u06FF\s\-']+$");
-    return nameRegex.hasMatch(trimmedName);
+    return name.trim().length >= 2;
   }
 
   // Password validation
   static bool isValidPassword(String password) {
-    if (password.isEmpty) return false;
-    
-    // At least 8 characters, contains letters and numbers
-    if (password.length < 8) return false;
-    
-    final hasLetter = RegExp(r'[a-zA-Z]').hasMatch(password);
-    final hasNumber = RegExp(r'[0-9]').hasMatch(password);
-    
-    return hasLetter && hasNumber;
+    return password.length >= 6;
   }
 
   // Quiz score validation
@@ -165,6 +149,50 @@ class ValidationService {
     return isValidEmail(sanitized) ? sanitized : null;
   }
 
+  // Validate email
+  static String? validateEmail(String? email) {
+    if (email == null || email.isEmpty) {
+      return 'البريد الإلكتروني مطلوب';
+    }
+    if (!isValidEmail(email)) {
+      return 'البريد الإلكتروني غير صحيح';
+    }
+    return null;
+  }
+
+  // Validate name
+  static String? validateName(String? name) {
+    if (name == null || name.isEmpty) {
+      return 'الاسم مطلوب';
+    }
+    if (!isValidName(name)) {
+      return 'الاسم يجب أن يكون أكثر من حرفين';
+    }
+    return null;
+  }
+
+  // Validate password
+  static String? validatePassword(String? password) {
+    if (password == null || password.isEmpty) {
+      return 'كلمة المرور مطلوبة';
+    }
+    if (!isValidPassword(password)) {
+      return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+    }
+    return null;
+  }
+
+  // Validate confirm password
+  static String? validateConfirmPassword(String? password, String? confirmPassword) {
+    if (confirmPassword == null || confirmPassword.isEmpty) {
+      return 'تأكيد كلمة المرور مطلوب';
+    }
+    if (password != confirmPassword) {
+      return 'كلمات المرور غير متطابقة';
+    }
+    return null;
+  }
+
   // Get validation error message
   static String getValidationErrorMessage(String field, String value) {
     switch (field.toLowerCase()) {
@@ -174,11 +202,11 @@ class ValidationService {
         break;
       case 'name':
         if (value.isEmpty) return 'الاسم مطلوب';
-        if (!isValidName(value)) return 'الاسم يجب أن يكون بين 2-50 حرف';
+        if (!isValidName(value)) return 'الاسم يجب أن يكون أكثر من حرفين';
         break;
       case 'password':
         if (value.isEmpty) return 'كلمة المرور مطلوبة';
-        if (!isValidPassword(value)) return 'كلمة المرور يجب أن تكون 8 أحرف على الأقل وتحتوي على أرقام وحروف';
+        if (!isValidPassword(value)) return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
         break;
       default:
         return 'قيمة غير صحيحة';

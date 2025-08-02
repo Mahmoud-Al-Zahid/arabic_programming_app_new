@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/providers/json_data_providers.dart';
+import '../../../../core/providers/app_provider.dart';
 import '../widgets/language_card.dart';
 import '../widgets/user_stats_card.dart';
 import '../widgets/continue_learning_card.dart';

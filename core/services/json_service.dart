@@ -4,160 +4,108 @@ import '../data/models/language_model.dart';
 import '../data/models/course_model.dart';
 import '../data/models/lesson_model.dart';
 import '../data/models/quiz_model.dart';
-import '../constants/json_paths.dart';
 
 class JsonService {
-  static final JsonService _instance = JsonService._internal();
-  factory JsonService() => _instance;
-  JsonService._internal();
-
-  // Cache للبيانات المحملة
-  final Map<String, dynamic> _cache = {};
-
-  // تحميل ملف JSON من الأصول
-  Future<Map<String, dynamic>> _loadJsonAsset(String path) async {
-    if (_cache.containsKey(path)) {
-      return _cache[path];
-    }
-
+  Future<List<LanguageModel>> loadLanguages() async {
     try {
-      final String jsonString = await rootBundle.loadString(path);
-      final Map<String, dynamic> jsonData = json.decode(jsonString);
-      _cache[path] = jsonData;
-      return jsonData;
+      final String response = await rootBundle.loadString('assets/languages/languages.json');
+      final Map<String, dynamic> data = json.decode(response);
+      final List<dynamic> languagesJson = data['languages'];
+      return languagesJson.map((json) => LanguageModel.fromJson(json)).toList();
     } catch (e) {
-      print('Error loading JSON from $path: $e');
-      throw Exception('Failed to load JSON data from $path');
+      throw Exception('Failed to load languages: $e');
     }
   }
 
-  // تحميل قائمة اللغات
-  Future<List<Language>> loadLanguages() async {
+  Future<CourseModel?> loadCourse(String courseId) async {
     try {
-      final jsonData = await _loadJsonAsset(JsonPaths.languages);
-      final List<dynamic> languagesJson = jsonData['languages'] ?? [];
-      
-      return languagesJson
-          .map((languageJson) => Language.fromJson(languageJson))
-          .toList();
+      final String response = await rootBundle.loadString('assets/courses/$courseId.json');
+      final Map<String, dynamic> data = json.decode(response);
+      return CourseModel.fromJson(data);
     } catch (e) {
-      print('Error loading languages: $e');
+      return null;
+    }
+  }
+
+  Future<List<CourseModel>> loadCoursesByLanguage(String languageId) async {
+    try {
+      // This would typically load multiple courses for a language
+      final course = await loadCourse(languageId);
+      return course != null ? [course] : [];
+    } catch (e) {
       return [];
     }
   }
 
-  // تحميل كورس معين
-  Future<Course?> loadCourse(String languageId) async {
+  Future<List<LessonModel>> loadLessonsByCourse(String courseId) async {
     try {
-      final path = JsonPaths.getCoursePath(languageId);
-      final jsonData = await _loadJsonAsset(path);
-      return Course.fromJson(jsonData);
-    } catch (e) {
-      print('Error loading course for $languageId: $e');
-      return null;
-    }
-  }
+      // Load course first to get lesson IDs
+      final course = await loadCourse(courseId);
+      if (course?.levels == null) return [];
 
-  // تحميل درس معين
-  Future<Lesson?> loadLesson(String languageId, String lessonId) async {
-    try {
-      final path = JsonPaths.getLessonPath(languageId, lessonId);
-      final jsonData = await _loadJsonAsset(path);
-      return Lesson.fromJson(jsonData);
-    } catch (e) {
-      print('Error loading lesson $lessonId for $languageId: $e');
-      return null;
-    }
-  }
-
-  // تحميل اختبار درس
-  Future<Quiz?> loadLessonQuiz(String lessonId) async {
-    try {
-      final path = JsonPaths.getLessonQuizPath(lessonId);
-      final jsonData = await _loadJsonAsset(path);
-      return Quiz.fromJson(jsonData);
-    } catch (e) {
-      print('Error loading quiz for lesson $lessonId: $e');
-      return null;
-    }
-  }
-
-  // تحميل اختبار مستوى
-  Future<Quiz?> loadLevelQuiz(String levelId) async {
-    try {
-      final path = JsonPaths.getLevelQuizPath(levelId);
-      final jsonData = await _loadJsonAsset(path);
-      return Quiz.fromJson(jsonData);
-    } catch (e) {
-      print('Error loading quiz for level $levelId: $e');
-      return null;
-    }
-  }
-
-  // التحقق من صحة البيانات
-  bool validateJsonStructure(Map<String, dynamic> data, String type) {
-    switch (type) {
-      case 'language':
-        return data.containsKey('id') && 
-               data.containsKey('name') && 
-               data.containsKey('description');
-      case 'course':
-        return data.containsKey('languageId') && 
-               data.containsKey('levels') && 
-               data['levels'] is List;
-      case 'lesson':
-        return data.containsKey('lessonId') && 
-               data.containsKey('lessonTitle') && 
-               data.containsKey('slides');
-      case 'quiz':
-        return data.containsKey('id') && 
-               data.containsKey('questions') && 
-               data['questions'] is List;
-      default:
-        return false;
-    }
-  }
-
-  // البحث في المحتوى
-  Future<List<dynamic>> searchContent(String query, {String? languageId}) async {
-    try {
-      final List<dynamic> results = [];
+      List<LessonModel> lessons = [];
       
-      // البحث في اللغات
-      final languages = await loadLanguages();
-      for (final language in languages) {
-        if (languageId != null && language.id != languageId) continue;
-        
-        if (language.name.toLowerCase().contains(query.toLowerCase()) ||
-            language.description.toLowerCase().contains(query.toLowerCase())) {
-          results.add(language);
+      for (final level in course!.levels!) {
+        if (level.lessons != null) {
+          for (final lessonId in level.lessons!) {
+            final lesson = await loadLesson(lessonId);
+            if (lesson != null) {
+              lessons.add(lesson);
+            }
+          }
         }
       }
       
-      return results;
+      return lessons;
     } catch (e) {
-      print('Error searching content: $e');
       return [];
     }
   }
 
-  // مسح الكاش
-  void clearCache() {
-    _cache.clear();
+  Future<LessonModel?> loadLesson(String lessonId) async {
+    try {
+      // Try different paths for lesson files
+      final paths = [
+        'assets/lessons/python/$lessonId.json',
+        'assets/lessons/$lessonId.json',
+      ];
+      
+      for (final path in paths) {
+        try {
+          final String response = await rootBundle.loadString(path);
+          final Map<String, dynamic> data = json.decode(response);
+          return LessonModel.fromJson(data);
+        } catch (e) {
+          continue;
+        }
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
   }
 
-  // مسح كاش ملف معين
-  void clearCacheForPath(String path) {
-    _cache.remove(path);
-  }
-
-  // التحقق من وجود ملف في الكاش
-  bool isCached(String path) {
-    return _cache.containsKey(path);
-  }
-
-  // الحصول على حجم الكاش
-  int getCacheSize() {
-    return _cache.length;
+  Future<QuizModel?> loadQuiz(String quizId) async {
+    try {
+      // Try different paths for quiz files
+      final paths = [
+        'assets/quizzes/lessons/$quizId.json',
+        'assets/quizzes/levels/$quizId.json',
+        'assets/quizzes/$quizId.json',
+      ];
+      
+      for (final path in paths) {
+        try {
+          final String response = await rootBundle.loadString(path);
+          final Map<String, dynamic> data = json.decode(response);
+          return QuizModel.fromJson(data);
+        } catch (e) {
+          continue;
+        }
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
   }
 }

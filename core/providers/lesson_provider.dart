@@ -1,7 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/lesson_model.dart';
 import '../data/models/slide_model.dart';
+import '../data/models/quiz_model.dart';
 import '../data/repositories/course_repository.dart';
+import '../services/json_service.dart';
+import 'app_provider.dart';
+
+final lessonByIdProvider = FutureProvider.family<LessonModel?, String>((ref, lessonId) async {
+  final jsonService = ref.read(jsonServiceProvider);
+  return await jsonService.loadLesson(lessonId);
+});
+
+final quizByIdProvider = FutureProvider.family<QuizModel?, String>((ref, quizId) async {
+  final jsonService = ref.read(jsonServiceProvider);
+  return await jsonService.loadQuiz(quizId);
+});
+
+final lessonProgressProvider = StateProvider.family<double, String>((ref, lessonId) => 0.0);
 
 class LessonProvider extends ChangeNotifier {
   final CourseRepository _courseRepository;
@@ -9,7 +25,7 @@ class LessonProvider extends ChangeNotifier {
   // State
   bool _isLoading = false;
   String? _error;
-  Lesson? _currentLesson;
+  LessonModel? _currentLesson;
   int _currentSlideIndex = 0;
   bool _isLessonCompleted = false;
   int _timeSpent = 0;
@@ -20,7 +36,7 @@ class LessonProvider extends ChangeNotifier {
   // Getters
   bool get isLoading => _isLoading;
   String? get error => _error;
-  Lesson? get currentLesson => _currentLesson;
+  LessonModel? get currentLesson => _currentLesson;
   int get currentSlideIndex => _currentSlideIndex;
   bool get isLessonCompleted => _isLessonCompleted;
   int get timeSpent => _timeSpent;
